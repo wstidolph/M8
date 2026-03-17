@@ -4,9 +4,9 @@
 
 ### 1.1 Multi-Platform App (The Questioner Interface)
 * **Framework:** **Flutter** (Google).
-  * **Reasoning:** Superior performance for the "Zero UI" hardware-accelerated animations (the fluid/floating orb text). Flutter's Skia/Impeller engine provides 60/120fps consistency across iOS, Android, WearOS, and notably, compiles natively for **Windows and MacOS** desktop environments as required by the PRD.
+  * **Reasoning:** Superior performance for the "Zero UI" hardware-accelerated animations (the fluid/floating orb text). Flutter's Skia/Impeller engine provides 60/120fps consistency across iOS, watchOS (Apple Watch), Android, WearOS (Google Pixel Watch, Samsung Galaxy Watch), and notably, compiles natively for **Windows and MacOS** desktop environments as required by the PRD.
 * **State Management:** Riverpod or BLoC (to handle the complex sensor-triggered state transitions from "idle" to "shaking" to "revealing", as well as UI button triggers for desktop users).
-* **Sensor Integration:** `sensors_plus` plugin for high-precision accelerometer data to distinguish between "light" vs "violent" shakes on mobile wearables. For desktop platforms, an equivalent accessible on-screen control (e.g., a "Shake" button) will trigger the same animation logic.
+* **Sensor Integration:** `sensors_plus` plugin for high-precision accelerometer data to distinguish between "light" vs "violent" shakes on mobile and wearables (Apple Watch, Pixel Watch, Galaxy Watch). For desktop platforms, an equivalent accessible on-screen control (e.g., a "Shake" button) will trigger the same animation logic.
 
 ### 1.2 Web Application (Author & Questioner Dashboards)
 * **Frontend:** **Next.js** (React) with **Tailwind CSS**.

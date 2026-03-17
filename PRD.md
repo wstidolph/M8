@@ -9,7 +9,7 @@
 **2.1 Questioner**
 * **Role:** The end-user who interacts with the M8 application to ask questions and receive answers.
 * **Experience:** Asks a question, activates the app (e.g., by shaking the device or clicking a button), and watches an answer "float" into view.
-* **Environment:** Primarily mobile devices (phones, tablets, smartwatches) across iOS, Android, WearOS, and also desktop platforms (Windows, MacOS).
+* **Environment:** Primarily mobile devices (phones, tablets, and smartwatches such as Apple Watch, Google Pixel Watch, and Samsung Galaxy Watch) across iOS, watchOS, Android, WearOS, and also desktop platforms (Windows, MacOS).
 
 **2.2 Author**
 * **Role:** The creator of custom answer sets.
@@ -42,7 +42,7 @@
   * On-screen control/button for non-mobile platforms (desktop) or accessibility purposes.
 * **Answer Display:** A visual animation where the answer "floats" into view, mimicking the physical toy.
 * **Custom Answer Sets:** Ability to receive and load custom answer sets created by Authors.
-* **Cross-Platform Support:** Seamless experience across Android, WearOS, iOS, Windows, and MacOS.
+* **Cross-Platform Support:** Seamless experience across Android, WearOS (Google Pixel Watch, Samsung Galaxy Watch), iOS, watchOS (Apple Watch), Windows, and MacOS.
 
 ### 4.2 Author Features
 * **Account Management:** Sign in/sign up functionality to manage creations and payments.
@@ -59,7 +59,7 @@
 
 ## 5. Technical Requirements
 * **Version Control:** Git, hosted on GitHub.
-* **Cross-Platform Framework:** Since the app targets a wide variety of mobile, wearable, and desktop platforms, a cross-platform framework like Flutter, React Native, or .NET MAUI should be evaluated.
+* **Cross-Platform Framework:** Since the app targets a wide variety of mobile, wearable (including Apple Watch, Google Pixel Watch, and Samsung Galaxy Watch), and desktop platforms, a cross-platform framework like Flutter, React Native, or .NET MAUI should be evaluated.
 * **Backend Backend:** Needed for user authentication (Authors), payment processing, and storing/distributing custom answer sets.
 * **Device Sensors:** Integration with device accelerometers for the "shake" feature.
 
