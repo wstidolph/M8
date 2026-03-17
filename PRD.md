@@ -33,6 +33,11 @@
 * **Payment Gateway Integration:** Secure payment processing for submitting custom answer sets (target price point: ~$2).
 * **Distribution System:** Ability to send the finished answer set to a Questioner via SMS or Email.
 
+### 3.3 Content & Data Rules
+* **Character Limit:** Each answer response is strictly limited to a maximum of 70 characters (half-Tweet length) to ensure it fits legibly within the M8 window on the Questioner's device.
+* **Profanity Filter:** Submitted answer sets must pass an automated profanity and inappropriate content filter before they can be purchased or published.
+* **Expiration Dates:** Custom answer sets will have an expiration date/time. Once expired, the Questioner's M8 might revert to default answers or prompt the user for a new set.
+
 ## 4. Technical Requirements
 * **Version Control:** Git, hosted on GitHub.
 * **Cross-Platform Framework:** Since the app targets a wide variety of mobile, wearable, and desktop platforms, a cross-platform framework like Flutter, React Native, or .NET MAUI should be evaluated.
