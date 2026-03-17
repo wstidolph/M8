@@ -123,6 +123,7 @@ Given the critical requirement that the M8 app feels smooth, available, and resp
   2. **The Notification/Acceptance Screen:** A modal overlaying the Orb View saying "New from John!" with visual cues for "Light Shake to Accept" and "Violent Shake to Reject".
      ![Smartphone Notification Mockup](C:\Users\wayne\.gemini\antigravity\brain\ce55bdd7-8f96-4fa9-9abd-8d1e11ae8c15\m8_smartphone_invite_1773790530188.png)
   3. **Author Dashboard (Desktop):** A clean, form-based layout mimicking a spreadsheet or a simple list to input 8 answers quickly. Contains a prominent "Device Preview" panel on the right side.
+     ![Author Dashboard Mockup](C:\Users\wayne\.gemini\antigravity\brain\ce55bdd7-8f96-4fa9-9abd-8d1e11ae8c15\m8_author_dashboard_1773790636741.png)
 
 
 ---
