@@ -90,6 +90,15 @@
    * Review previously received Answer Sets even after they have expired (though reloading them is disabled).
    * Reset their M8 device back to the default original answers at any time.
 
+## 8. Out of Scope (Targeted for Phase 2+)
+To ensure a lean, timely, and successful launch of Phase 1, the following features are explicitly out of scope for the initial release and are slated for Phase 2:
+* **Audio/Voice Recognition:** The Phase 1 MVP will not include voice-to-text recognition or dictate functionality (i.e., Questioners speaking their questions to the app).
+* **Social Networking Features:** Friends lists, direct "in-app" sharing between Author and Questioner (beyond SMS/Email deep links), and global leaderboards of popular Answer Sets.
+* **Complex Media Answers:** Including images, GIFs, or audio clips as responses in a custom Answer Set.
+* **Subscription Model:** Phase 1 relies strictly on the Pay-per-Set model. Recurring Author subscriptions will be explored later.
+* **Monetization for the Questioner:** Charging the Questioner to unlock slots or giving them the ability to tip the Author.
+* **Extensive Analytics:** Dashboards showing exactly when and how many times an answer was triggered will be held back for future updates.
+
 ---
 *Document Version: 0.1*
 *Status: Initial Draft*
