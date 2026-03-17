@@ -93,7 +93,17 @@
    * Review previously received Answer Sets even after they have expired (though reloading them is disabled).
    * Reset their M8 device back to the default original answers at any time.
 
-## 8. Out of Scope (Targeted for Phase 2+)
+## 8. Backend Architecture (Phase 1)
+To keep Phase 1 lean and cost-effective while leaving room for "social" scaling in Phase 2, the backend will be designed around a small initial footprint (target ~5,000 users). Expected load per user is very light: Authors will have <10 Questioners, and Questioners will hold <10 Answer Sets. 
+
+* **Infrastructure:** A serverless approach (e.g., AWS Lambda, Firebase Functions, or Cloudflare Workers) is ideal to keep costs near zero during early adoption while effortlessly handling traffic spikes.
+* **Database:** A managed NoSQL database (e.g., Firebase Firestore, AWS DynamoDB) or a simple managed relational database (e.g., PostgreSQL via Supabase). Given the structured relational nature of the data (Users -> AnswerSets -> Answers) and the very small dataset (e.g., < 50,000 rows initially), a lightweight relational database is perfectly sufficient and easier to query.
+* **Storage:** Cloud storage (AWS S3 or Google Cloud Storage) will be minimal in Phase 1 (primarily for storing JSON/text payloads of Answer Sets or basic User avatars), keeping costs low.
+* **Authentication & Payments:** 
+  * Auth: Utilize managed services like Firebase Authentication, Auth0, or Supabase Auth to handle Social Logins and age verification workflows seamlessly.
+  * Payments: Stripe API handles the pay-per-set transactions offloading PCI compliance and transaction state management.
+
+## 9. Out of Scope (Targeted for Phase 2+)
 To ensure a lean, timely, and successful launch of Phase 1, the following features are explicitly out of scope for the initial release and are slated for Phase 2:
 * **Audio/Voice Recognition:** The Phase 1 MVP will not include voice-to-text recognition or dictate functionality (i.e., Questioners speaking their questions to the app).
 * **Social Networking Features:** Friends lists, direct "in-app" sharing between Author and Questioner (beyond SMS/Email deep links), and global leaderboards of popular Answer Sets.
