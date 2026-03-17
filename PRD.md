@@ -19,7 +19,7 @@
 ## 3. Data Objects
 
 ### 3.1 User
-* **Attributes:** `UserID`, `AuthenticationMethod` (e.g., email/password, OAuth), `PhoneNumber` (optional, for SMS invites), `EmailAddress`, `Role` (Author, Questioner, Admin), `CreatedAt`, `LastLogin`.
+* **Attributes:** `UserID`, `AuthenticationMethod` (e.g., email/password, OAuth), `PhoneNumber` (optional, for SMS invites), `EmailAddress`, `Role` (Author, Questioner, Admin), `CreatedAt`, `LastLogin`, `DateOfBirth`.
 * **Description:** Represents an individual using the platform. An individual can act as an Author (creating sets) and a Questioner (receiving sets from others).
 
 ### 3.2 AnswerSet
@@ -55,6 +55,7 @@
 * **Character Limit:** Each answer response is strictly limited to a maximum of 70 characters (half-Tweet length) to ensure it fits legibly within the M8 window on the Questioner's device.
 * **Profanity Filter:** Submitted answer sets must pass an automated profanity and inappropriate content filter before they can be purchased or published.
 * **Expiration Dates:** Custom answer sets will have an expiration date/time. Once expired, the Questioner's M8 might revert to default answers or prompt the user for a new set.
+* **Age Verification & Parental Review:** Users registering as Questioners must provide their date of birth. If a Questioner is under a defined age threshold (e.g., 13 years old), receiving and accepting new Answer Sets requires an explicit parental-review or guardian-approval step.
 
 ## 5. Technical Requirements
 * **Version Control:** Git, hosted on GitHub.
@@ -78,13 +79,15 @@
 6. **Checkout & Distribution:** The Author proceeds to payment. Upon successful transaction (e.g., ~$2 fee), the system automatically dispatches an invitation link/payload to the Questioner via the selected method (SMS/Email).
 
 ### 7.2 Questioner Flow (Receiving & Using Sets)
-1. **Invitation Receipt:** The Questioner receives an invite via SMS or Email containing a deep link to the newly gifted Answer Set.
-2. **Acceptance/Rejection:** Upon opening the M8 app via the link, the user sees a notification (e.g., "New from John!"). 
+1. **Registration & Age Verification:** The Questioner downloads the app and registers. During registration, age is verified via birthdate. If under the defined threshold, a parent/guardian email must be linked.
+2. **Invitation Receipt:** The Questioner receives an invite via SMS or Email containing a deep link to the newly gifted Answer Set.
+3. **Parental Review (If Applicable):** If the Questioner is underage, the gifted Answer Set is placed in a pending status until the linked parent/guardian reviews and approves its content.
+4. **Acceptance/Rejection:** Upon opening the M8 app via the link (and following parental approval if needed), the user sees a notification (e.g., "New from John!"). 
    * **Light Shake:** Accepts and loads the new Answer Set.
    * **Violent Shake:** Rejects the Answer Set. Rejection requires an on-screen confirmation before discarding.
-3. **Activation Animation:** Upon acceptance, a loading animation signifies the new Answer Set has been equipped, and the user can proceed to use the M8.
-4. **Normal Usage:** The Questioner interacts with M8 by asking a question and shaking the device to reveal the customized floating answer. *(Note: Phase 2 will introduce voice/audio recognition for responding to verbal questions).*
-5. **Management Web App:** Questioners have access to a web app dashboard where they can:
+5. **Activation Animation:** Upon acceptance, a loading animation signifies the new Answer Set has been equipped, and the user can proceed to use the M8.
+6. **Normal Usage:** The Questioner interacts with M8 by asking a question and shaking the device to reveal the customized floating answer. *(Note: Phase 2 will introduce voice/audio recognition for responding to verbal questions).*
+7. **Management Web App:** Questioners have access to a web app dashboard where they can:
    * View a list of all Answer Sets they have ever received.
    * Reload any valid Answer Set onto their device until its expiration date.
    * Review previously received Answer Sets even after they have expired (though reloading them is disabled).
