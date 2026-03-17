@@ -47,6 +47,18 @@
 ## 5. Monetization Strategy
 * **Pay-per-Set:** The primary revenue stream is charging Authors a small fee (e.g., $2) for each custom answer set they create and send.
 
+## 6. Application Flows
+
+### 6.1 Author Flow (Answer Set Creation & Distribution)
+1. **Authentication:** The Author logs into the desktop application (or creates a new account).
+2. **Dashboard & History:** The Author views their dashboard, which displays past answer sets. From here, they can choose to start an entirely new set, or duplicate/edit an existing set (either to resend to the same Questioner or repurpose for a different Questioner).
+3. **Target Selection:** The Author enters the target Questioner's contact information (Phone Number for SMS, or Email Address) and provides a label for the set (e.g., "FromJohn").
+4. **Drafting Content:** 
+   * The Author is presented with an interface to construct up to eight Answer responses (with optional associated questions for context). 
+   * The system may offer a bank of "Common Answers" for inspiration, allowing the Author to select and edit these templates.
+5. **Simulation & Preview:** Using the built-in device simulator, the Author selects target device profiles (e.g., Apple Watch, Android Phone, Windows Desktop) to preview how the floating text will animation will look. This helps authors ensure their text fits properly within the constraints.
+6. **Checkout & Distribution:** The Author proceeds to payment. Upon successful transaction (e.g., ~$2 fee), the system automatically dispatches an invitation link/payload to the Questioner via the selected method (SMS/Email).
+
 ---
 *Document Version: 0.1*
 *Status: Initial Draft*
