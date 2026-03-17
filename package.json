@@ -1,0 +1,8 @@
+{
+  "name": "m8-workspace",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
