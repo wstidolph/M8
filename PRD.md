@@ -112,6 +112,17 @@ To ensure a lean, timely, and successful launch of Phase 1, the following featur
 * **Monetization for the Questioner:** Charging the Questioner to unlock slots or giving them the ability to tip the Author.
 * **Extensive Analytics:** Dashboards showing exactly when and how many times an answer was triggered will be held back for future updates.
 
+## 10. UI/UX & Wireframe Guidelines
+Given the critical requirement that the M8 app feels smooth, available, and responsive across all manner of handhelds (phones, smartwatches, tablets):
+* **Performance-First Design:** Animations (like the floating text revealing the answer) must be hardware-accelerated. We must avoid heavy graphical assets that cause dropping frames on older devices.
+* **Responsive Fluid Layouts:** The core UI (the M8 window) must scale proportionally to fit square screens (WearOS), tall screens (phones), and large screens (tablets/desktops) without letterboxing or squashing.
+* **The "Zero UI" Concept (Questioner):** For the Questioner, the interface should feel almost invisible during normal use. The primary interaction is physical (the shake), with UI elements minimized to just the floating text and perhaps a subtle settings/menu icon.
+* **Wireframe Core Views:**
+  1. **The Orb View:** The main screen containing the liquid/floating animation and the text window. Must dominate the screen.
+  2. **The Notification/Acceptance Screen:** A modal overlaying the Orb View saying "New from John!" with visual cues for "Light Shake to Accept" and "Violent Shake to Reject".
+  3. **Author Dashboard (Desktop):** A clean, form-based layout mimicking a spreadsheet or a simple list to input 8 answers quickly. Contains a prominent "Device Preview" panel on the right side.
+
+
 ---
 *Document Version: 0.1*
 *Status: Initial Draft*
