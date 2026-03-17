@@ -125,7 +125,16 @@ Given the critical requirement that the M8 app feels smooth, available, and resp
   3. **Author Dashboard (Desktop):** A clean, form-based layout mimicking a spreadsheet or a simple list to input 8 answers quickly. Contains a prominent "Device Preview" panel on the right side.
      ![Author Dashboard Mockup](C:\Users\wayne\.gemini\antigravity\brain\ce55bdd7-8f96-4fa9-9abd-8d1e11ae8c15\m8_author_dashboard_1773790636741.png)
 
+## Addendum: AI Image Generation Prompts
+Below are the exact AI image generation prompts used to conceptualize the UI wireframes included in this document:
+
+* **The Orb View (Smartwatch):**
+  > "A modern, sleek UI mockup of the M8 app interface on a smartwatch. A sleek dark mode background featuring a large, glowing, mystical blue orb taking up the entire screen. Inside the center of the orb is a glowing window with a triangle containing the text 'Yes, absolutely' floating in it. High fidelity, zero UI, hardware-like aesthetic."
+* **The Notification/Acceptance Screen (Smartphone):**
+  > "A sleek UI mockup of the M8 app interface on a smartphone. Deep dark space theme. Centered is a glowing blue orb window. Overlaid on top is an elegant glassmorphic notification modal saying 'New from John!'. Underneath the text are sleek visual cues showing a phone vibrating gently and shaking violently, with labels 'Light Shake: Accept' and 'Violent Shake: Reject'. High fidelity, minimalist, and modern."
+* **Author Dashboard (Desktop):**
+  > "A sleek, modern web UI for a desktop dashboard. On the left side, there is a clean spreadsheet-like form with 8 text input rows for entering 'Magic Eightball' answers. On the right side, there is a live preview of the answers displaying inside a glowing mystical blue orb on a smartphone screen mockup. Dark mode, premium aesthetic, glassmorphism."
 
 ---
-*Document Version: 0.1*
-*Status: Initial Draft*
+*Document Version: 1.0*
+*Status: Final*
