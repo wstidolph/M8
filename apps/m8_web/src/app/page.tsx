@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { AnswerSetStatusEnum, TargetMethodEnum } from "@m8/shared";
 
 export default function AuthorDashboard() {
   const [answers, setAnswers] = useState<string[]>(Array(8).fill(""));
   const [targetContact, setTargetContact] = useState("");
   const [label, setLabel] = useState("");
   const [activePreviewIndex, setActivePreviewIndex] = useState<number>(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAnswerChange = (index: number, value: string) => {
     if (value.length <= 70) {
@@ -14,6 +17,55 @@ export default function AuthorDashboard() {
       newAnswers[index] = value;
       setAnswers(newAnswers);
       setActivePreviewIndex(index);
+    }
+  };
+
+  const handleCheckout = async () => {
+    setIsSubmitting(true);
+    
+    try {
+      // 1. Determine target method naive check
+      const isEmail = targetContact.includes('@');
+      const targetMethod = isEmail ? TargetMethodEnum.enum.EMAIL : TargetMethodEnum.enum.PHONE;
+
+      // 2. Generate a temporary mock author_id for Phase 1 testing
+      const mockAuthorId = crypto.randomUUID();
+      const setId = crypto.randomUUID();
+
+      // 3. Insert AnswerSet Draft into Supabase
+      const { error: setError } = await supabase.from('AnswerSets').insert({
+        set_id: setId,
+        author_id: mockAuthorId, // In production, this comes from Supabase Auth
+        target_method: targetMethod,
+        label: label || "Mystic Responses",
+        status: AnswerSetStatusEnum.enum.DRAFT,
+      });
+
+      if (setError) throw setError;
+
+      // 4. Insert each Answer into Supabase
+      const answersToInsert = answers
+        .map((responseText, index) => ({
+          answer_id: crypto.randomUUID(),
+          set_id: setId,
+          response_text: responseText || "Concentrate and ask again",
+          sequence_order: index,
+        }))
+        // Filter out completely empty ones if desired, or keep all 8.
+        // We will save all 8 per PRD.
+
+      const { error: answersError } = await supabase.from('Answers').insert(answersToInsert);
+
+      if (answersError) throw answersError;
+
+      alert("Successfully saved Draft to Supabase! Proceeding to Stripe Checkout...");
+      
+      // Future: Trigger Stripe redirect here
+    } catch (e: any) {
+      console.error(e);
+      alert("Failed to save Answer Set to Supabase: " + e.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -41,8 +93,16 @@ export default function AuthorDashboard() {
             <span className="text-sm text-slate-400 border border-slate-800 rounded-full px-4 py-1.5 bg-slate-900/50">
               Draft Mode
             </span>
-            <button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-6 py-2 rounded-lg font-medium shadow-lg shadow-blue-900/20 transition-all">
-              Checkout & Send
+            <button 
+              onClick={handleCheckout}
+              disabled={isSubmitting}
+              className={`px-6 py-2 rounded-lg font-medium shadow-lg transition-all ${
+                isSubmitting 
+                  ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-blue-900/20'
+              }`}
+            >
+              {isSubmitting ? 'Saving...' : 'Checkout & Send'}
             </button>
           </div>
         </header>
