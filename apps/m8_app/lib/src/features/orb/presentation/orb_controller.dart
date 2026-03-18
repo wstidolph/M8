@@ -43,6 +43,7 @@ class OrbController extends StateNotifier<OrbAnimationState> {
   StreamSubscription? _sensorSub;
   Timer? _dampeningTimer;
   Timer? _dismissalTimer;
+  DateTime? _lastInteractionEnd;
 
   OrbController(this._sensorService) : super(const OrbAnimationState()) {
     _initializeAnswers();
@@ -60,12 +61,24 @@ class OrbController extends StateNotifier<OrbAnimationState> {
   }
 
   void init() {
+    _sensorService.init();
     _sensorSub = _sensorService.shakeIntensityStream.listen((intensity) {
       _handleSensorInput(intensity);
     });
   }
 
   void _handleSensorInput(ShakeIntensity intensity) {
+    // 1. Workflow [/sensor-calibration]: Debounce after interaction (500ms)
+    final now = DateTime.now();
+    if (_lastInteractionEnd != null && now.difference(_lastInteractionEnd!) < const Duration(milliseconds: 500)) {
+      return;
+    }
+
+    // 2. Ignore sensors if already presenting an answer
+    if (state.state == OrbState.presenting || state.state == OrbState.revealing) {
+      return;
+    }
+
     // Clear existing timers when new motion starts
     _dampeningTimer?.cancel();
     _dismissalTimer?.cancel();
@@ -134,6 +147,7 @@ class OrbController extends StateNotifier<OrbAnimationState> {
   }
 
   void _dismissAnswer() {
+    _lastInteractionEnd = DateTime.now();
     state = state.copyWith(
       state: OrbState.idle,
       revealedAnswer: null,

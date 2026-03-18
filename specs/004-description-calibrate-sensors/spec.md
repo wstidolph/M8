@@ -2,7 +2,7 @@
 
 **Feature Branch**: `004-sensor-calibration`  
 **Created**: 2026-03-18  
-**Status**: Draft  
+**Status**: Done
 **Input**: Integrated Workflow `[/sensor-calibration]`
 
 ## User Scenarios & Testing
@@ -27,8 +27,8 @@ As a user, I want to trigger the "Chaos" state when I shake the device violently
 ## Requirements
 
 ### Functional Requirements
-- **FR-001**: System MUST calculate net acceleration magnitude relative to gravity (9.81 m/s²).
-- **FR-002**: System MUST implement a noise floor filter at 0.2g.
+- **FR-001**: System MUST calculate net acceleration magnitude using `userAccelerometerEventStream` (already G-normalized relative to 9.81 m/s²).
+- **FR-002**: System MUST implement a noise floor filter at 0.2g to ignore ambient movement.
 - **FR-003**: System MUST implement a debounce mechanism of 500ms after a state transition (e.g., from `revealing` back to `idle`) to prevent phantom triggers.
 
 ### Calibration Thresholds

@@ -10,33 +10,81 @@ enum ShakeIntensity {
 }
 
 /// A service that interprets raw accelerometer data into M8-specific shake intensities.
+/// Follows [/sensor-calibration] thresholds.
 class SensorService {
   /// Gravity constant in m/s^2
   static const double _g = 9.81;
 
-  /// Thresholds (in G-force)
-  static const double _lightThresholdG = 1.2;
-  static const double _violentThresholdG = 4.0;
+  /// Calibration Thresholds (in G-force)
+  static const double _noiseFloorG = 0.2;
+  static const double _lightMinG = 1.5;
+  static const double _lightMaxG = 3.5;
+  static const double _violentThresholdG = 4.5;
+  
+  /// Duration Threshold for light shake (US1)
+  static const Duration _requiredDuration = Duration(milliseconds: 300);
+
+  final _controller = StreamController<ShakeIntensity>.broadcast();
+  StreamSubscription? _subscription;
+  Timer? _durationTimer;
+  bool _isSustainingLight = false;
 
   /// Stream of categorized shake intensities.
-  Stream<ShakeIntensity> get shakeIntensityStream {
-    return userAccelerometerEventStream().map((event) {
-      // Calculate the magnitude of the 3D acceleration vector
-      final magnitude = math.sqrt(
-        math.pow(event.x, 2) + 
-        math.pow(event.y, 2) + 
-        math.pow(event.z, 2)
-      );
+  Stream<ShakeIntensity> get shakeIntensityStream => _controller.stream;
 
-      final gForce = magnitude / _g;
+  /// Starts listening to sensor data.
+  void init() {
+    _subscription = userAccelerometerEventStream().listen(_handleEvent);
+  }
 
-      if (gForce >= _violentThresholdG) {
-        return ShakeIntensity.violent;
-      } else if (gForce >= _lightThresholdG) {
-        return ShakeIntensity.light;
-      } else {
-        return ShakeIntensity.none;
+  void _handleEvent(UserAccelerometerEvent event) {
+    // Calculate the magnitude of the 3D acceleration vector (user acceleration, gravity removed)
+    final magnitude = math.sqrt(
+      math.pow(event.x, 2) + 
+      math.pow(event.y, 2) + 
+      math.pow(event.z, 2)
+    );
+
+    final gForce = magnitude / _g;
+
+    // 1. Noise Floor Filter
+    if (gForce < _noiseFloorG) {
+      _resetLightDetection();
+      _controller.add(ShakeIntensity.none);
+      return;
+    }
+
+    // 2. Violent Peak (Instant trigger)
+    if (gForce >= _violentThresholdG) {
+      _resetLightDetection();
+      _controller.add(ShakeIntensity.violent);
+      return;
+    }
+
+    // 3. Sustained Light Shake Duration Check (US1)
+    if (gForce >= _lightMinG && gForce <= _lightMaxG) {
+      if (!_isSustainingLight) {
+        _isSustainingLight = true;
+        _durationTimer = Timer(_requiredDuration, () {
+          if (_isSustainingLight) {
+            _controller.add(ShakeIntensity.light);
+          }
+        });
       }
-    }).distinct(); // Only emit when the intensity category changes
+    } else {
+      _resetLightDetection();
+    }
+  }
+
+  void _resetLightDetection() {
+    _isSustainingLight = false;
+    _durationTimer?.cancel();
+  }
+
+  /// Cleans up resources.
+  void dispose() {
+    _subscription?.cancel();
+    _durationTimer?.cancel();
+    _controller.close();
   }
 }
