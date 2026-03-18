@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'orb_controller.dart';
 import 'orb_painter.dart';
 import 'components/answer_visual.dart';
+import 'components/history_drawer.dart';
 import '../domain/orb_state.dart';
 
 /// The primary Questioner view for the M8 orb experience.
@@ -44,47 +45,61 @@ class _OrbViewState extends ConsumerState<OrbView> with SingleTickerProviderStat
 
     return Scaffold(
       backgroundColor: const Color(0xFF000814),
-      body: Stack(
-        children: [
-          Center(
-            child: AspectRatio(
-              aspectRatio: 1.0,
-              child: Padding(
-                padding: EdgeInsets.all(basePadding),
-                child: RepaintBoundary(
-                  child: AnimatedBuilder(
-                    animation: _animController,
-                    builder: (context, _) {
-                      return CustomPaint(
-                        painter: OrbPainter(
-                          animationValue: _animController.value,
-                          state: orbState.state,
-                          turbulence: orbState.turbulence,
-                          isAODMode: false, // TODO: Detect system AOD state
-                        ),
-                      );
-                    },
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          // Subtle tap to toggle history
+          ref.read(orbControllerProvider.notifier).toggleHistory();
+        },
+        child: Stack(
+          children: [
+            Center(
+              child: AspectRatio(
+                aspectRatio: 1.0,
+                child: Padding(
+                  padding: EdgeInsets.all(basePadding),
+                  child: RepaintBoundary(
+                    child: AnimatedBuilder(
+                      animation: _animController,
+                      builder: (context, _) {
+                        return CustomPaint(
+                          painter: OrbPainter(
+                            animationValue: _animController.value,
+                            state: orbState.state,
+                            turbulence: orbState.turbulence,
+                            isAODMode: false, // TODO: Detect system AOD state
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          
-          // 4. Floating Answer Overlay (US3)
-          if (isPresenting && orbState.revealedAnswer != null)
-             Center(
-               child: AnimatedScale(
-                 scale: isPresenting ? 1.0 : 0.8,
-                 duration: const Duration(milliseconds: 1200),
-                 curve: Curves.elasticOut,
-                 child: AnimatedOpacity(
-                   opacity: isPresenting ? 1.0 : 0.0,
-                   duration: const Duration(milliseconds: 800),
-                   child: AnswerVisual(text: orbState.revealedAnswer!),
+            
+            // 4. Floating Answer Overlay (US3)
+            if (isPresenting && orbState.revealedAnswer != null)
+               Center(
+                 child: AnimatedScale(
+                   scale: isPresenting ? 1.0 : 0.8,
+                   duration: const Duration(milliseconds: 1200),
+                   curve: Curves.elasticOut,
+                   child: AnimatedOpacity(
+                     opacity: isPresenting ? 1.0 : 0.0,
+                     duration: const Duration(milliseconds: 800),
+                     child: AnswerVisual(text: orbState.revealedAnswer!),
+                   ),
                  ),
                ),
-             ),
-        ],
+            
+            // 5. Mystic History Overlay (US2)
+            if (orbState.showHistory)
+               HistoryDrawer(
+                 history: orbState.history,
+                 onClose: () => ref.read(orbControllerProvider.notifier).toggleHistory(),
+               ),
+          ],
+        ),
       ),
     );
   }

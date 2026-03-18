@@ -86,7 +86,7 @@
    * **Light Shake:** Accepts and loads the new Answer Set.
    * **Violent Shake:** Rejects the Answer Set. Rejection requires an on-screen confirmation before discarding.
 5. **Activation Animation:** Upon acceptance, a loading animation signifies the new Answer Set has been equipped, and the user can proceed to use the M8.
-6. **Normal Usage:** The Questioner interacts with M8 by asking a question and shaking the device to reveal the customized floating answer. *(Note: Phase 2 will introduce voice/audio recognition for responding to verbal questions).*
+6. **Normal Usage:** The Questioner interacts with M8 by asking a question and shaking the device to reveal the customized floating answer. *(Note: Phase 2 will introduce voice/audio recognition and a "Share Answer" feature).*
 7. **Management Web App:** Questioners have access to a web app dashboard where they can:
    * View a list of all Answer Sets they have ever received.
    * Reload any valid Answer Set onto their device until its expiration date.
@@ -108,6 +108,7 @@ To ensure a lean, timely, and successful launch of Phase 1, the following featur
 * **Audio/Voice Recognition:** The Phase 1 MVP will not include voice-to-text recognition or dictate functionality (i.e., Questioners speaking their questions to the app).
 * **Social Networking Features:** Friends lists, direct "in-app" sharing between Author and Questioner (beyond SMS/Email deep links), and global leaderboards of popular Answer Sets.
 * **Complex Media Answers:** Including images, GIFs, or audio clips as responses in a custom Answer Set.
+* **Share Answer (Phase 2):** Implementation of a screenshot/canvas-snapshot service to generate "Mystic Assets" for social sharing (Instagram/TikTok).
 * **Subscription Model:** Phase 1 relies strictly on the Pay-per-Set model. Recurring Author subscriptions will be explored later.
 * **Monetization for the Questioner:** Charging the Questioner to unlock slots or giving them the ability to tip the Author.
 * **Extensive Analytics:** Dashboards showing exactly when and how many times an answer was triggered will be held back for future updates.

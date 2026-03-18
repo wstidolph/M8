@@ -13,22 +13,30 @@ class OrbAnimationState {
   final OrbState state;
   final double turbulence;
   final String? revealedAnswer;
+  final List<String> history;
+  final bool showHistory;
 
   const OrbAnimationState({
     this.state = OrbState.idle,
     this.turbulence = 0.0,
     this.revealedAnswer,
+    this.history = const [],
+    this.showHistory = false,
   });
 
   OrbAnimationState copyWith({
     OrbState? state,
     double? turbulence,
     String? revealedAnswer,
+    List<String>? history,
+    bool? showHistory,
   }) {
     return OrbAnimationState(
       state: state ?? this.state,
       turbulence: turbulence ?? this.turbulence,
       revealedAnswer: revealedAnswer ?? this.revealedAnswer,
+      history: history ?? this.history,
+      showHistory: showHistory ?? this.showHistory,
     );
   }
 }
@@ -123,11 +131,17 @@ class OrbController extends StateNotifier<OrbAnimationState> {
   void _triggerAnswerReveal() {
     if (_answerPool.isEmpty) return;
     
-    state = state.copyWith(state: OrbState.revealing);
-    
-    // Select answer using engine and current "mood" (based on turbulence)
+    // 1. Select answer using engine and current "mood" (based on turbulence)
     final mood = state.turbulence > 0.8 ? OrbMood.energetic : OrbMood.idle;
     final selected = _engine.selectAnswer(_answerPool, mood);
+
+    // 2. Update history
+    final updatedHistory = [selected.text, ...state.history].take(10).cast<String>().toList();
+    
+    state = state.copyWith(
+      state: OrbState.revealing,
+      history: updatedHistory,
+    );
 
     // Simulate short animation before presenting
     Future.delayed(const Duration(milliseconds: 1000), () {
@@ -153,6 +167,10 @@ class OrbController extends StateNotifier<OrbAnimationState> {
       revealedAnswer: null,
       turbulence: 0.0,
     );
+  }
+
+  void toggleHistory() {
+    state = state.copyWith(showHistory: !state.showHistory);
   }
 
   @override

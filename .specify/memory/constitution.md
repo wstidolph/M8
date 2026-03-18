@@ -1,50 +1,45 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# M8 Project Constitution
+
+The M8 platform is a 21st-century digital-social reincarnation of the classic mystical oracle. This constitution defines the non-negotiable principles of its architecture, design, and user experience.
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Zero UI & Physical Interaction (NON-NEGOTIABLE)
+The core Questioner experience MUST revolve around invisible, physical interactions. 
+- **Physical-First**: Primary interaction triggers are high-precision sensor events (Light Shake vs. Violent Shake).
+- **Invisible Interface**: On-screen controls MUST be minimized to avoid breaking the mystical immersion. 
+- **Feedback**: Use Haptic Sensory Language (selection clicks, heavy impacts) to replace visual confirmations.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Mystic Premium Aesthetics & Performance
+M8 MUST feel like a high-end digital artifact, not a standard mobile app.
+- **Palette**: Strictly adhere to the "Deep Space" visual identity (Background: `0xFF000814`, Liquid: `0xFF1D4ED8`, Glow: `0xFF60A5FA`).
+- **Typography**: Google Fonts *Outfit* (Semi-bold, spacing 1.5) for the Orb; *Inter* for administrative UI.
+- **Glassmorphism**: Use `BackdropFilter` (sigma 15) for all overlays to maintain depth.
+- **Performance**: Animated components (CustomPainter) MUST target 60fps minimum. Repaint Boundaries MUST be used to isolate high-frequency renders.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Offline-First Resilience
+The ability to consult the orb is a fundamental utility that MUST NOT depend on active connectivity.
+- **Persistence**: All dynamic answer sets MUST be cached locally (e.g., `flutter_secure_storage`).
+- **Graceful Fallback**: If remote sync (Supabase) fails, the system MUST revert to local cache or the "Classic Answers" pool without interrupting the user flow.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Privacy, Safety & Age Verification
+M8 deals with direct communication ("Gifts"); thus, user safety is paramount.
+- **Consent Gateway**: Date of Birth (DOB) verification is mandatory for all members.
+- **Parental Review**: Underage Questioners MUST have a Guardian-monitored gateway for accepting custom answer sets.
+- **Data Sovereignty**: Use Supabase Row Level Security (RLS) to ensure users can ONLY access invitations specifically targeting their verified phone/email.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Cross-Platform Native Excellence
+M8 MUST adapt perfectly to the form factor’s unique constraints while sharing a core logic engine.
+- **Wearable-First**: Prioritize circular UI safety (15%+ insets) and battery-efficient AOD (Always-On Display) modes.
+- **Desktop Parity**: Provide "Shake Simulation" on non-mobile platforms via clear but non-intrusive UI triggers.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Technical Constraints
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
-
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
-
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- **Stack**: Flutter 3.x (Core), Supabase (Backend/Auth), Riverpod (State).
+- **Feature Lifecycle**: Every feature follows the `speckit` lifecycle: `spec.md` -> `plan.md` -> `tasks.md`.
+- **Quality Gates**: All feature merges to `main` REQUIRE verified documentation coverage and successfully passed unit/widget tests.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+This constitution supersedes all individual implementation plans. Any conflict between a proposed feature and these principles MUST be resolved in favor of the constitution. Amendments require a formal version update.
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-03-18 | **Last Amended**: 2026-03-18

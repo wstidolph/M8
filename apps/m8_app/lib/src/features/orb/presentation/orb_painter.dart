@@ -70,15 +70,21 @@ class OrbPainter extends CustomPainter {
       ..color = _electricBlue
       ..style = PaintingStyle.fill;
 
+    // Reusable path to minimize object allocations during the paint loop
+    final p = Path();
+    
     // Draw 3 layers of sine waves with different phases
     for (int i = 0; i < 3; i++) {
-       final p = Path();
+       p.reset();
        final phase = (animationValue * 2 * math.pi) + (i * math.pi / 2);
        final currentAmplitude = baseAmplitude * (1.0 - (i * 0.2));
        final currentFrequency = baseFrequency * (0.8 + (i * 0.1));
 
        p.moveTo(0, size.height);
-       for (double x = 0; x <= size.width; x += 2.0) {
+       
+       // Optimization: Increased step size from 2.0 to 4.0 for higher FPS on low-end GPUs
+       // without significant visual degradation for these amorphous waves.
+       for (double x = 0; x <= size.width; x += 4.0) {
          final relativeX = x / size.width;
          final y = center.dy + 
                   (radius * (1 - 2 * fillLevel)) +
@@ -86,7 +92,6 @@ class OrbPainter extends CustomPainter {
          p.lineTo(x, y);
        }
        p.lineTo(size.width, size.height);
-       p.lineTo(0, size.height);
        p.close();
 
        // Adjust opacity for depth effect

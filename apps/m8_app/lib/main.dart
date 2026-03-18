@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'src/features/orb/presentation/orb_view.dart';
+import 'src/features/onboarding/presentation/age_verification_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,7 +13,13 @@ void main() async {
     anonKey: 'sb_publishable_ba6YYsXyaBfpP4QTz-5GDw_kwZQ2TLP',
   );
 
-  runApp(const ProviderScope(child: M8App()));
+  runApp(
+    const ProviderScope(
+      child: AgeVerificationPage(
+        child: M8App(),
+      ),
+    ),
+  );
 }
 
 class M8App extends StatelessWidget {

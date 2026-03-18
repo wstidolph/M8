@@ -61,6 +61,9 @@ We will follow a monorepo structure to share types, business logic, and assets e
 * **Row Level Security (RLS):** Supabase policies will ensure Questioners can only read AnswerSets targeting their specific contact info (Email/Phone).
 * **Parental Approval Gateway:** A boolean flag on the `User` profile (`isUnderage`). If true, the `AnswerSet.Status` remains `PendingReview` until a separate Admin/Guardian API call is made.
 
----
+## 6. Phase 2 Roadmap (Social & Advanced)
+- **Share Answer Engine**: Implementation of a screenshot/canvas-snapshot service to generate "Mystic Assets" for social sharing.
+- **Audio Recognition**: Integration of `speech_to_text` for verbal question interaction.
+- **Social Connect**: P2P sharing of Answer Sets directly within the app UI.
 *Document Version: 0.1*
 *Status: Draft Design*
