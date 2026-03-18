@@ -24,6 +24,8 @@ Flutter 3.x / Dart 3.x: Follow standard conventions
 ## Recent Changes
 
 - 001-orb-animation: Added Flutter 3.x / Dart 3.x + `sensors_plus`, `flutter_riverpod`
+- 002-dynamic-responses: Implemented Dynamic Answer Response Engine with Supabase sync and mood weighting.
+- 003-wearable-optimization: Optimized for WearOS/watchOS circular layouts and haptic sensory feedback.
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
