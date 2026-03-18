@@ -35,6 +35,12 @@ class _OrbViewState extends ConsumerState<OrbView> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     final orbState = ref.watch(orbControllerProvider);
     final isPresenting = orbState.state == OrbState.presenting;
+    
+    // Dynamic Circular Safety Insets (Workflow Phase 1)
+    final screenSize = MediaQuery.of(context).size;
+    final isWatchSize = screenSize.width < 320;
+    // On small/watch screens, apply approx 15-20% padding to prevent clipping at corners
+    final basePadding = isWatchSize ? screenSize.width * 0.15 : 24.0;
 
     return Scaffold(
       backgroundColor: const Color(0xFF000814),
@@ -44,7 +50,7 @@ class _OrbViewState extends ConsumerState<OrbView> with SingleTickerProviderStat
             child: AspectRatio(
               aspectRatio: 1.0,
               child: Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: EdgeInsets.all(basePadding),
                 child: RepaintBoundary(
                   child: AnimatedBuilder(
                     animation: _animController,
@@ -54,6 +60,7 @@ class _OrbViewState extends ConsumerState<OrbView> with SingleTickerProviderStat
                           animationValue: _animController.value,
                           state: orbState.state,
                           turbulence: orbState.turbulence,
+                          isAODMode: false, // TODO: Detect system AOD state
                         ),
                       );
                     },

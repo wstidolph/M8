@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'src/features/orb/presentation/orb_view.dart';
 
-void main() {
-  runApp(
-    const ProviderScope(
-      child: M8App(),
-    ),
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // TODO: Replace with your credentials from Supabase Project Settings > API
+  await Supabase.initialize(
+    url: 'https://wmryrzbkcjqwmhbqaeus.supabase.co',
+    anonKey: 'sb_publishable_ba6YYsXyaBfpP4QTz-5GDw_kwZQ2TLP',
   );
+
+  runApp(const ProviderScope(child: M8App()));
 }
 
 class M8App extends StatelessWidget {

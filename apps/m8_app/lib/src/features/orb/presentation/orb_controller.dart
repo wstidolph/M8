@@ -1,7 +1,12 @@
 import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/orb_state.dart';
 import '../infrastructure/sensor_service.dart';
+import '../../responses/domain/orb_mood.dart';
+import '../../responses/domain/answer.dart';
+import '../../responses/application/response_engine.dart';
+import '../../responses/infrastructure/answer_repository.dart';
 
 /// State of the Orb animation including physics parameters and current visual state.
 class OrbAnimationState {
@@ -31,11 +36,28 @@ class OrbAnimationState {
 /// Controller for the M8 orb simulation, handling sensor triggers and orchestration.
 class OrbController extends StateNotifier<OrbAnimationState> {
   final SensorService _sensorService;
+  final ResponseEngine _engine = ResponseEngine();
+  final AnswerRepository _repository = AnswerRepository();
+  List<Answer> _answerPool = [];
+
   StreamSubscription? _sensorSub;
   Timer? _dampeningTimer;
   Timer? _dismissalTimer;
 
-  OrbController(this._sensorService) : super(const OrbAnimationState());
+  OrbController(this._sensorService) : super(const OrbAnimationState()) {
+    _initializeAnswers();
+  }
+
+  Future<void> _initializeAnswers() async {
+    // 1. Load initial pool (classic/cached)
+    _answerPool = await _repository.getActivePool();
+    
+    // 2. Trigger background sync
+    await _repository.syncRemote();
+    
+    // 3. Update pool after sync
+    _answerPool = await _repository.getActivePool();
+  }
 
   void init() {
     _sensorSub = _sensorService.shakeIntensityStream.listen((intensity) {
@@ -50,6 +72,7 @@ class OrbController extends StateNotifier<OrbAnimationState> {
     
     switch (intensity) {
       case ShakeIntensity.violent:
+        HapticFeedback.heavyImpact();
         state = state.copyWith(
           state: OrbState.chaotic,
           turbulence: 1.0,
@@ -85,14 +108,21 @@ class OrbController extends StateNotifier<OrbAnimationState> {
   }
 
   void _triggerAnswerReveal() {
+    if (_answerPool.isEmpty) return;
+    
     state = state.copyWith(state: OrbState.revealing);
     
+    // Select answer using engine and current "mood" (based on turbulence)
+    final mood = state.turbulence > 0.8 ? OrbMood.energetic : OrbMood.idle;
+    final selected = _engine.selectAnswer(_answerPool, mood);
+
     // Simulate short animation before presenting
     Future.delayed(const Duration(milliseconds: 1000), () {
       if (mounted) {
+        HapticFeedback.selectionClick();
         state = state.copyWith(
           state: OrbState.presenting,
-          revealedAnswer: "IT IS CERTAIN", // Sample answer for Phase 2
+          revealedAnswer: selected.text,
         );
         
         // Start auto-dismissal timer (as per research.md: 7s)
