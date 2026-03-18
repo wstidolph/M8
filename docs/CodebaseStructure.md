@@ -47,17 +47,17 @@ We are utilizing **npm workspaces** as defined in the root `package.json` to man
 ### 3.3 packages/shared
 * **Purpose:** A pure TypeScript package that defines the strict shapes of our database objects based on the PRD boundaries.
 * **Key Exports:**
-  * `User` interfaces
-  * `AnswerSet` and `Answer` types
-  * Validation schemas (Zod or plain TS) for API requests.
+  * `User` interfaces and Zod validation schemas.
+  * `AnswerSet`, `Answer`, and `Invitation` types.
+  * Specialized Enums for `AnswerSetStatus`, `UserRole`, etc.
 
 ### 3.4 supabase/
 * **Purpose:** Configuration and business logic for the backend-as-a-service.
 * **Responsibilities:**
-  * Database schema definitions (Tables, Foreign Keys).
-  * Row Level Security (RLS) policies to ensure Questioners only see sets gifted to their Phone Number / Email.
-  * Edge Functions containing the logic to trigger outbound SMS/Emails when an Author completes a payment via Stripe.
+  * **Migrations:** Initial SQL schema migrations defining the PostgreSQL tables and types.
+  * **RLS:** Initial Row Level Security policies to protect user data.
+  * **Edge Functions:** Deno Edge Functions (Logic for outbound SMS/Email triggers).
 
-## 4. Work In Progress Notes
+## 4. Current Progress & Notes
 * The Flutter codebase `m8_app` requires initialization via the `flutter create` command once the host machine environment has the Flutter SDK set up.
-* Next steps involve laying out the database models into `/packages/shared` and creating the corresponding SQL files in `/supabase/migrations`.
+* **Completed:** Root monorepo structure, `@m8/shared` package identification, Next.js `m8_web` scaffold with integrated Supabase client, and initial PostgreSQL schema migration.
