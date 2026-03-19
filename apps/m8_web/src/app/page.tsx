@@ -352,26 +352,18 @@ export default function AuthorDashboard() {
         if (answersError) throw answersError;
       }
 
-      // 2. Create the Gift Instance
-      const { error: giftError } = await supabase.from('gifts').insert({
-        gift_id: giftId,
-        set_id: setId,
-        author_id: user.id,
-        target_contact: targetContact,
-        status: initialStatus
+      // 2. Atomic: Create Gift Instance and Transaction (Phase 1 Mock)
+      const { data: rpcRes, error: rpcErr } = await supabase.rpc('process_gift_checkout', {
+          p_set_id: setId,
+          p_author_id: user.id,
+          p_target_contact: targetContact,
+          p_status: initialStatus,
+          p_amount: 2.00,
+          p_provider: 'MOCK',
+          p_txn_id: window.crypto.randomUUID()
       });
-      if (giftError) throw giftError;
 
-      // 3. Record the Transaction (Phase 1 Mock)
-      const { error: txnError } = await supabase.from('transactions').insert({
-        txn_id: window.crypto.randomUUID(),
-        user_id: user.id,
-        gift_id: giftId,
-        amount: 2.00,
-        provider: 'MOCK',
-        status: 'SUCCEEDED'
-      });
-      if (txnError) throw txnError;
+      if (rpcErr || !rpcRes.success) throw new Error(rpcErr?.message || rpcRes?.error);
 
       setIsPaymentModalOpen(false);
       setPendingPayment(null);
