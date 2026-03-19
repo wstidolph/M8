@@ -7,9 +7,9 @@
 - [x] **T009.2: Age-Verification Web Integration** (P1)
   - [x] Add `date_of_birth` input to signup/profile management in `auth/page.tsx`.
   - [x] Block "Checkout" for recipients who are under 13 but have no linked guardian (or auto-tag as `PENDING_REVIEW`).
-- [ ] **T009.3: Flutter Restriction Interface** (P1)
+- [x] **T009.3: Flutter Restriction Interface** (P1)
   - [x] Update `AnswerRepository` to filter gifts by `status == 'ACTIVE'`.
-  - [ ] Implement `ParentalGatingScreen` (Overlay) when a gift is `PENDING_REVIEW`.
+  - [x] Implement `ParentalGatingScreen` (Overlay) when a gift is `PENDING_REVIEW` (via `InvitationOverlay`).
 - [x] **T009.4: Simple Guardian portal** (P2)
   - [x] Create a page (mock) `/guardian/approve?id={gift_id}`.
   - [x] Allow clicking "Approve" to move status to `ACTIVE`.
