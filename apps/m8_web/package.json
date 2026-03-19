@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@m8/shared": "*",
+    "@supabase/auth-helpers-nextjs": "^0.15.0",
     "@supabase/supabase-js": "^2.99.2",
     "next": "16.1.7",
     "react": "19.2.3",

@@ -1,0 +1,23 @@
+# Task Checklist: Author Identity & Core Dashboard (006)
+
+- [X] **T006.1: Supabase Identity Layer Integration** (P1)
+  - [X] Implement `signInWithPassword` and `signUp` routes/components.
+  - [X] Implement `signOut` and redirected logout logic.
+- [X] **T006.2: Secure Draft Persistence Refactor** (P1)
+  - [X] Replace `mockAuthorId` in `handleCheckout` with `supabase.auth.getUser()`.
+  - [X] Update `AnswerSets` insert logic to `upsert`.
+  - [X] Integrate save logic with **Feature 008 (Library Sidebar)**.
+  - [X] Verify `AnswerSet` status is correctly set to `Draft` on save.
+- [X] **T006.3: Premium Multi-Device Preview (Zero UI)** (P1)
+  - [X] Extract `DevicePreview` component with `mode` prop.
+  - [X] Implement `Watch Mode` (Circular clip-path/insets).
+  - [X] Implement **Orb Pulsate animation** (CSS scale/opacity).
+  - [X] Implement **Pure Mode** toggle to hide creator UI in simulator.
+  - [X] Refine the "Mobile Preview" to align with **PRD section 10.3**.
+- [X] **T006.4: Auth Middleware Protection** (P2)
+  - [X] Create `middleware.ts` to redirect unauthenticated users to `/login`.
+  - [X] Ensure `/dashboard` and `/create` routes are strictly protected.
+- [X] **T006.5: Character Validation & Pre-Filtering** (P2)
+  - [X] Enforce `maxlength="70"` on all 8 answer inputs.
+  - [X] Add reactive character counters.
+  - [X] Block "Save Draft" if `TargetContact` is empty/invalid.
