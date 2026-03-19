@@ -24,6 +24,7 @@ import { LibrarySidebar, AnswerSet } from "@/components/LibrarySidebar";
 import { GiftsLog, Gift } from "@/components/GiftsLog";
 
 import { TransactionsLog, Transaction } from "@/components/TransactionsLog";
+import { DemoToolbar } from "@/components/DemoToolbar";
 
 type DashboardView = "CREATE" | "HISTORY" | "TRANSACTIONS";
 
@@ -642,6 +643,7 @@ export default function AuthorDashboard() {
           setPendingPayment(null);
         }}
       />
+      <DemoToolbar />
     </div>
   );
 }

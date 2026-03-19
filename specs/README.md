@@ -16,7 +16,9 @@ This directory contains the technical specifications and implementation plans fo
 | 009 | [Parental Review](./009-parental-review-gateway) | 4.3 | Age verification (DOB), Gated gifts, and Guardian portal. | ✅ Complete |
 | 010 | [Invitation Flow](./010-flutter-invitation-acceptance) | 7.2 | Flutter-side gesture acceptance (Shake to Accept). | ✅ Complete |
 | 011 | [Payments](./011-payments) | 6 | Mocked transaction workflow & $2/set monetization. | ✅ Complete |
-| 012 | [User Connectivity](./012-user-connectivity) | 4.3 | Automated SMS & Email invitations for Questioners/Guardians. | 📅 Phase 1 (Planning) |
+| 012 | [User Connectivity](./012-user-connectivity) | 4.3 | Automated SMS & Email invitations for Questioners/Guardians. | ✅ Complete |
+| 013 | [Demonstration Mode](./013-demonstration-mode) | 13 | Mocked connectivity & Seed state for stakeholders. | 📅 Phase 1 (Planning) |
+| 014 | Social Sharing (Mystic Assets) | 🚀 Phase 2 |
 
 ---
 

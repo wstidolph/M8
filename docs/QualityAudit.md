@@ -20,6 +20,7 @@ We have addressed critical "Hidden Faults" identified during the pre-shipping re
 - **🔐 Atomic Checkout**: Previously, a failed transaction entry could leave a "Sent" Gift in an inconsistent state. We implemented a **PostgreSQL RPC** (`process_gift_checkout`) to ensure both registration and transaction are atomic (All-or-Nothing).
 - **🚀 Mobile Pool Hydration**: Fixed a race condition where inherited AnswerSets wouldn't show up in the Orb until a manual restart. Added `refreshAnswers()` trigger on Acceptance.
 - **🛡️ SQL Case Normalization**: Standardized all database calls to use lowercase table names (`answer_sets`), avoiding casing errors in mixed environments (Next.js/Deno/Supabase).
+- **🎭 Demonstration Mode (013)**: Implemented a "Zero Infrastructure" sandbox with a floating **Demo Toolbox**. Stakeholders can reset the mystical state and intercept SMS/Email notifications in real-time. Full walkthrough documented in **[`DEMO_SCRIPT.md`](./DEMO_SCRIPT.md)**.
 
 ### Remaining Edge Cases (Risk Registry)
 - **SMS Delivery Failback**: If Twilio fails, the `gifts` status remains `ACTIVE` but the Questioner never receives the link. 

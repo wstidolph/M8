@@ -9,9 +9,14 @@ const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID") || "";
 const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN") || "";
 const TWILIO_PHONE_NUMBER = Deno.env.get("TWILIO_PHONE_NUMBER") || "";
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
 serve(async (req) => {
   const { type, payload } = await req.json();
+
+  // Always log to Demo Interceptor for stakeholder visibility (013)
+  await logToDemoInterceptor(type, payload);
 
   try {
     switch (type) {
@@ -112,5 +117,33 @@ async function sendWithTwilio(to: string, body: string) {
       To: to,
       Body: body,
     }).toString(),
+  });
+}
+
+async function logToDemoInterceptor(type: string, payload: any) {
+  const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
+  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return;
+
+  const content = type === "GIFT_INVITE" 
+    ? `SMS to ${payload.target}: M8 gift from ${payload.label}`
+    : type === "GUARDIAN_GATE"
+    ? `Email to ${payload.guardianEmail}: Review needed for ${payload.questionerName}`
+    : `Email to ${payload.authorEmail}: Gift rejected - ${payload.reason}`;
+
+  await fetch(`${SUPABASE_URL}/rest/v1/demo_notifications`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      "apikey": SUPABASE_SERVICE_ROLE_KEY,
+    },
+    body: JSON.stringify({
+      recipient: payload.target || payload.guardianEmail || payload.authorEmail,
+      type,
+      body: content,
+      payload
+    }),
   });
 }
