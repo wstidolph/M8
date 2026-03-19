@@ -18,6 +18,7 @@ class InvitationOverlay extends ConsumerStatefulWidget {
 class _InvitationOverlayState extends ConsumerState<InvitationOverlay> {
   StreamSubscription? _sensorSub;
   final _sensorService = SensorService();
+  bool _showDiscardConfirm = false; // PRD: Violent shake confirmation
 
   @override
   void initState() {
@@ -25,11 +26,12 @@ class _InvitationOverlayState extends ConsumerState<InvitationOverlay> {
     _sensorService.init();
     _sensorSub = _sensorService.shakeIntensityStream.listen((intensity) {
       final progress = ref.read(invitationControllerProvider);
-      if (progress.status == InvitationStatus.pending) {
+      if (progress.status == InvitationStatus.pending && !_showDiscardConfirm) {
         if (intensity == ShakeIntensity.light) {
           _handleAccept();
         } else if (intensity == ShakeIntensity.violent) {
-          _handleReject();
+          setState(() { _showDiscardConfirm = true; });
+          HapticFeedback.vibrate();
         }
       }
     });
@@ -45,8 +47,9 @@ class _InvitationOverlayState extends ConsumerState<InvitationOverlay> {
     }
   }
 
-  void _handleReject() {
+  void _handleFinalReject() {
     HapticFeedback.heavyImpact();
+    setState(() { _showDiscardConfirm = false; });
     ref.read(invitationControllerProvider.notifier).clear();
   }
 
@@ -59,78 +62,142 @@ class _InvitationOverlayState extends ConsumerState<InvitationOverlay> {
 
     return Material(
       color: Colors.black.withOpacity(0.85),
-      child: Center(
-        child: Container(
-          margin: const EdgeInsets.all(32),
-          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0F172A),
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: isGated ? Colors.orange.withOpacity(0.3) : Colors.blue.withOpacity(0.3)),
-            boxShadow: [
-              BoxShadow(
-                color: isGated ? Colors.orange.withOpacity(0.1) : Colors.blue.withOpacity(0.1),
-                blurRadius: 40.0,
-                spreadRadius: 10.0,
-              )
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                isGated ? Icons.security : Icons.celebration,
-                size: 48.0,
-                color: isGated ? Colors.orange : Colors.blue,
+      child: Stack(
+        children: [
+          Center(
+            child: Container(
+              margin: const EdgeInsets.all(32),
+              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F172A),
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: isGated ? Colors.orange.withOpacity(0.3) : Colors.blue.withOpacity(0.3)),
+                boxShadow: [
+                  BoxShadow(
+                    color: isGated ? Colors.orange.withOpacity(0.1) : Colors.blue.withOpacity(0.1),
+                    blurRadius: 40.0,
+                    spreadRadius: 10.0,
+                  )
+                ],
               ),
-              const SizedBox(height: 24),
-              Text(
-                isGated ? "Waiting for Approval" : "New from ${progress.label ?? 'a Friend'}!",
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22.0,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Outfit', // Fallback to system if not loaded
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                isGated 
-                  ? "This content is pending parental review. We'll let you know when it's ready!"
-                  : "A custom set of mystical responses has been gifted to you.",
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Color(0xFF94A3B8), // slate-400
-                  fontSize: 14.0,
-                  fontFamily: 'Inter',
-                ),
-              ),
-              const SizedBox(height: 40),
-              if (!isGated) ...[
-                const _InstructionRow(
-                  icon: Icons.vibration,
-                  label: "Light Shake to Accept",
-                  color: Colors.blue,
-                ),
-                const SizedBox(height: 12),
-                _InstructionRow(
-                  icon: Icons.error_outline,
-                  label: "Violent Shake to Reject",
-                  color: Colors.red.shade400,
-                ),
-              ] else 
-                ElevatedButton(
-                  onPressed: () => ref.read(invitationControllerProvider.notifier).clear(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1E293B), // slate-800
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isGated ? Icons.security : Icons.celebration,
+                    size: 48.0,
+                    color: isGated ? Colors.orange : Colors.blue,
                   ),
-                  child: const Text("OK"),
-                ),
-            ],
+                  const SizedBox(height: 24),
+                  Text(
+                    isGated ? "Waiting for Approval" : "New from ${progress.label ?? 'a Friend'}!",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22.0,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Outfit',
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    isGated 
+                      ? "This content is pending parental review. We'll let you know when it's ready!"
+                      : "A custom set of mystical responses has been gifted to you.",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Color(0xFF94A3B8), 
+                      fontSize: 14.0,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  if (!isGated) ...[
+                    const _InstructionRow(
+                      icon: Icons.vibration,
+                      label: "Light Shake to Accept",
+                      color: Colors.blue,
+                    ),
+                    const SizedBox(height: 12),
+                    _InstructionRow(
+                      icon: Icons.error_outline,
+                      label: "Violent Shake to Reject",
+                      color: Colors.red.shade400,
+                    ),
+                  ] else 
+                    ElevatedButton(
+                      onPressed: () => ref.read(invitationControllerProvider.notifier).clear(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1E293B), 
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text("OK"),
+                    ),
+                ],
+              ),
+            ),
           ),
-        ),
+          
+          // PRD: High-Impact Discard Confirmation Modal
+          if (_showDiscardConfirm)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.9),
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(32),
+                    margin: const EdgeInsets.symmetric(horizontal: 40),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E1E2E),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: Colors.red.withOpacity(0.4)),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          "DISCARD THIS GIFT?",
+                          style: TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 2.0,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "This action cannot be undone. Shaking too hard might cause you to lose this mystical gift forever.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white70, fontSize: 13),
+                        ),
+                        const SizedBox(height: 32),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextButton(
+                                onPressed: () => setState(() { _showDiscardConfirm = false; }),
+                                child: const Text("KEEP IT", style: TextStyle(color: Colors.blue)),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: _handleFinalReject,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red.shade900,
+                                ),
+                                child: const Text("DISCARD", style: TextStyle(color: Colors.white)),
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -87,7 +87,7 @@ class _OrbViewState extends ConsumerState<OrbView> with SingleTickerProviderStat
                                       animationValue: _animController.value,
                                       state: orbState.state,
                                       turbulence: orbState.turbulence ?? 0.0,
-                                      isAODMode: false,
+                                      isAODMode: orbState.isAODMode ?? false,
                                       nebulaIntensity: orbState.nebulaIntensity ?? 0.25,
                                     ),
                                   );

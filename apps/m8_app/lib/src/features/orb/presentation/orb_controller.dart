@@ -11,7 +11,7 @@ import '../../responses/infrastructure/answer_repository.dart';
 
 import 'components/answer_visual.dart';
 
-/// State of the Orb animation including physics parameters and current visual state.
+/// State of the Orb animation including physics, vividness, and AOD modes.
 class OrbAnimationState {
   final OrbState state;
   final double turbulence;
@@ -22,6 +22,7 @@ class OrbAnimationState {
   final int manifestationClock; 
   final OrbContainerShape containerShape;
   final double nebulaIntensity;
+  final bool isAODMode; // Feature: Power-saving mode
 
   const OrbAnimationState({
     this.state = OrbState.idle,
@@ -33,6 +34,7 @@ class OrbAnimationState {
     this.manifestationClock = 0,
     this.containerShape = OrbContainerShape.triangle,
     this.nebulaIntensity = 0.25,
+    this.isAODMode = false,
   });
 
   OrbAnimationState copyWith({
@@ -45,6 +47,7 @@ class OrbAnimationState {
     int? manifestationClock,
     OrbContainerShape? containerShape,
     double? nebulaIntensity,
+    bool? isAODMode,
   }) {
     return OrbAnimationState(
       state: state ?? this.state,
@@ -56,6 +59,7 @@ class OrbAnimationState {
       manifestationClock: manifestationClock ?? this.manifestationClock,
       containerShape: containerShape ?? this.containerShape,
       nebulaIntensity: nebulaIntensity ?? this.nebulaIntensity,
+      isAODMode: isAODMode ?? this.isAODMode,
     );
   }
 }
@@ -69,6 +73,7 @@ class OrbController extends StateNotifier<OrbAnimationState> {
   StreamSubscription? _sensorSub;
   Timer? _dampeningTimer;
   Timer? _dismissalTimer;
+  Timer? _aodTimer; // The Inactivity Ticker
 
   OrbController(this._sensorService) : super(const OrbAnimationState()) {
     _initializeAnswers();
@@ -85,6 +90,19 @@ class OrbController extends StateNotifier<OrbAnimationState> {
   void init() {
     _sensorService.init();
     _sensorSub = _sensorService.shakeIntensityStream.listen(_handleSensorInput);
+    _resetAodTimer();
+  }
+
+  void _resetAodTimer() {
+    _aodTimer?.cancel();
+    if (state.isAODMode) {
+       state = state.copyWith(isAODMode: false, nebulaIntensity: 0.25);
+    }
+    _aodTimer = Timer(const Duration(seconds: 30), () {
+      if (mounted && state.state == OrbState.idle) {
+         state = state.copyWith(isAODMode: true, nebulaIntensity: 0.1); 
+      }
+    });
   }
 
   Future<void> refreshAnswers() async {
@@ -92,6 +110,7 @@ class OrbController extends StateNotifier<OrbAnimationState> {
   }
 
   void _handleSensorInput(ShakeIntensity intensity) {
+    _resetAodTimer(); 
     if (state.state == OrbState.presenting || state.state == OrbState.revealing) return;
     _cleanupTimers();
     
@@ -193,9 +212,11 @@ class OrbController extends StateNotifier<OrbAnimationState> {
       turbulence: 0.0,
       nebulaIntensity: 0.25,
     );
+    _resetAodTimer();
   }
 
   void simulateManualShake() {
+    _resetAodTimer();
     _cleanupTimers();
     final newClock = state.manifestationClock + 1;
     state = state.copyWith(
@@ -204,12 +225,13 @@ class OrbController extends StateNotifier<OrbAnimationState> {
       revealedAnswer: null,
       revealSeed: math.Random().nextDouble(), 
       manifestationClock: newClock, 
-      nebulaIntensity: 0.9, // Ultra vivid start
+      nebulaIntensity: 0.9, 
     );
     _startDampening();
   }
 
   void toggleHistory() {
+    _resetAodTimer();
     state = state.copyWith(showHistory: !state.showHistory);
   }
 
@@ -217,6 +239,7 @@ class OrbController extends StateNotifier<OrbAnimationState> {
   void dispose() {
     _sensorSub?.cancel();
     _cleanupTimers();
+    _aodTimer?.cancel();
     super.dispose();
   }
 }
