@@ -5,6 +5,8 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+import { DemoToolbar } from "@/components/DemoToolbar";
+
 export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -167,6 +169,7 @@ export default function AuthPage() {
           Adhere to the M8 Constitution v1.0
         </p>
       </div>
+      <DemoToolbar />
     </div>
   );
 }

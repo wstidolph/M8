@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
 /// Categories of physical force applied to the device.
@@ -34,6 +35,7 @@ class SensorService {
 
   /// Starts listening to sensor data.
   void init() {
+    if (kIsWeb) return; // Skip hardware sensors in browser simulation
     _subscription = userAccelerometerEventStream().listen(_handleEvent);
   }
 

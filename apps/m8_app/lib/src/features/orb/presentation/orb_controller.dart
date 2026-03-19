@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/orb_state.dart';
@@ -8,6 +9,8 @@ import '../../responses/domain/answer.dart';
 import '../../responses/application/response_engine.dart';
 import '../../responses/infrastructure/answer_repository.dart';
 
+import 'components/answer_visual.dart';
+
 /// State of the Orb animation including physics parameters and current visual state.
 class OrbAnimationState {
   final OrbState state;
@@ -15,6 +18,10 @@ class OrbAnimationState {
   final String? revealedAnswer;
   final List<String> history;
   final bool showHistory;
+  final double revealSeed;
+  final int manifestationClock; 
+  final OrbContainerShape containerShape;
+  final double nebulaIntensity;
 
   const OrbAnimationState({
     this.state = OrbState.idle,
@@ -22,6 +29,10 @@ class OrbAnimationState {
     this.revealedAnswer,
     this.history = const [],
     this.showHistory = false,
+    this.revealSeed = 0.0,
+    this.manifestationClock = 0,
+    this.containerShape = OrbContainerShape.triangle,
+    this.nebulaIntensity = 0.25,
   });
 
   OrbAnimationState copyWith({
@@ -30,6 +41,10 @@ class OrbAnimationState {
     String? revealedAnswer,
     List<String>? history,
     bool? showHistory,
+    double? revealSeed,
+    int? manifestationClock,
+    OrbContainerShape? containerShape,
+    double? nebulaIntensity,
   }) {
     return OrbAnimationState(
       state: state ?? this.state,
@@ -37,11 +52,14 @@ class OrbAnimationState {
       revealedAnswer: revealedAnswer ?? this.revealedAnswer,
       history: history ?? this.history,
       showHistory: showHistory ?? this.showHistory,
+      revealSeed: revealSeed ?? this.revealSeed,
+      manifestationClock: manifestationClock ?? this.manifestationClock,
+      containerShape: containerShape ?? this.containerShape,
+      nebulaIntensity: nebulaIntensity ?? this.nebulaIntensity,
     );
   }
 }
 
-/// Controller for the M8 orb simulation, handling sensor triggers and orchestration.
 class OrbController extends StateNotifier<OrbAnimationState> {
   final SensorService _sensorService;
   final ResponseEngine _engine = ResponseEngine();
@@ -51,28 +69,22 @@ class OrbController extends StateNotifier<OrbAnimationState> {
   StreamSubscription? _sensorSub;
   Timer? _dampeningTimer;
   Timer? _dismissalTimer;
-  DateTime? _lastInteractionEnd;
 
   OrbController(this._sensorService) : super(const OrbAnimationState()) {
     _initializeAnswers();
   }
 
   Future<void> _initializeAnswers() async {
-    // 1. Load initial pool (classic/cached)
     _answerPool = await _repository.getActivePool();
-    
-    // 2. Trigger background sync
-    await _repository.syncRemote();
-    
-    // 3. Update pool after sync
-    _answerPool = await _repository.getActivePool();
+    try {
+      await _repository.syncRemote().timeout(const Duration(seconds: 3));
+      _answerPool = await _repository.getActivePool();
+    } catch (_) {}
   }
 
   void init() {
     _sensorService.init();
-    _sensorSub = _sensorService.shakeIntensityStream.listen((intensity) {
-      _handleSensorInput(intensity);
-    });
+    _sensorSub = _sensorService.shakeIntensityStream.listen(_handleSensorInput);
   }
 
   Future<void> refreshAnswers() async {
@@ -80,40 +92,20 @@ class OrbController extends StateNotifier<OrbAnimationState> {
   }
 
   void _handleSensorInput(ShakeIntensity intensity) {
-    // 1. Workflow [/sensor-calibration]: Debounce after interaction (500ms)
-    final now = DateTime.now();
-    if (_lastInteractionEnd != null && now.difference(_lastInteractionEnd!) < const Duration(milliseconds: 500)) {
-      return;
-    }
-
-    // 2. Ignore sensors if already presenting an answer
-    if (state.state == OrbState.presenting || state.state == OrbState.revealing) {
-      return;
-    }
-
-    // Clear existing timers when new motion starts
-    _dampeningTimer?.cancel();
-    _dismissalTimer?.cancel();
+    if (state.state == OrbState.presenting || state.state == OrbState.revealing) return;
+    _cleanupTimers();
     
     switch (intensity) {
       case ShakeIntensity.violent:
         HapticFeedback.heavyImpact();
-        state = state.copyWith(
-          state: OrbState.chaotic,
-          turbulence: 1.0,
-        );
+        state = state.copyWith(state: OrbState.chaotic, turbulence: 1.0, nebulaIntensity: 0.85);
         break;
       case ShakeIntensity.light:
-        // Transition from idle/revealing to turbulent
         if (state.state != OrbState.chaotic) {
-          state = state.copyWith(
-            state: OrbState.turbulent,
-            turbulence: 0.5,
-          );
+          state = state.copyWith(state: OrbState.turbulent, turbulence: 0.5, nebulaIntensity: 0.65);
         }
         break;
       case ShakeIntensity.none:
-        // Trigger dampening/settling logic if motion stops
         if (state.state == OrbState.turbulent || state.state == OrbState.chaotic) {
           _startDampening();
         }
@@ -121,11 +113,17 @@ class OrbController extends StateNotifier<OrbAnimationState> {
     }
   }
 
+  void _cleanupTimers() {
+    _dampeningTimer?.cancel();
+    _dismissalTimer?.cancel();
+  }
+
   void _startDampening() {
-    // Elastic dampening period (as per research.md: 500-1000ms)
+    final currentClock = state.manifestationClock;
     _dampeningTimer = Timer(const Duration(milliseconds: 750), () {
+      if (!mounted || state.manifestationClock != currentClock) return;
       if (state.state == OrbState.turbulent) {
-        state = state.copyWith(state: OrbState.idle, turbulence: 0.0);
+        state = state.copyWith(state: OrbState.idle, turbulence: 0.0, nebulaIntensity: 0.25);
       } else if (state.state == OrbState.chaotic) {
         _triggerAnswerReveal();
       }
@@ -135,42 +133,80 @@ class OrbController extends StateNotifier<OrbAnimationState> {
   void _triggerAnswerReveal() {
     if (_answerPool.isEmpty) return;
     
-    // 1. Select answer using engine and current "mood" (based on turbulence)
+    final currentClock = state.manifestationClock;
     final mood = state.turbulence > 0.8 ? OrbMood.energetic : OrbMood.idle;
     final selected = _engine.selectAnswer(_answerPool, mood);
-
-    // 2. Update history
-    final updatedHistory = [selected.text, ...state.history].take(10).cast<String>().toList();
     
     state = state.copyWith(
       state: OrbState.revealing,
-      history: updatedHistory,
+      revealedAnswer: selected.text,
+      history: [selected.text, ...state.history].take(10).cast<String>().toList(),
+      nebulaIntensity: 1.0, 
     );
 
-    // Simulate short animation before presenting
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      if (mounted) {
-        HapticFeedback.selectionClick();
-        state = state.copyWith(
-          state: OrbState.presenting,
-          revealedAnswer: selected.text,
-        );
-        
-        // Start auto-dismissal timer (as per research.md: 7s)
-        _dismissalTimer = Timer(const Duration(seconds: 7), () {
-           if (mounted) _dismissAnswer();
-        });
+    _animateNebulaDampening();
+
+    Future.delayed(const Duration(milliseconds: 3500), () {
+      if (!mounted || state.manifestationClock != currentClock) return;
+      
+      HapticFeedback.selectionClick();
+      state = state.copyWith(
+        state: OrbState.presenting,
+        nebulaIntensity: 0.4,
+      );
+      
+      _dismissalTimer = Timer(const Duration(seconds: 7), () {
+        if (mounted && state.manifestationClock == currentClock) _dismissAnswer();
+      });
+    });
+  }
+
+  void _animateNebulaDampening() {
+    final startClock = state.manifestationClock;
+    const duration = Duration(milliseconds: 3500);
+    const interval = Duration(milliseconds: 32);
+    int elapsed = 0;
+
+    Timer.periodic(interval, (timer) {
+      if (!mounted || state.manifestationClock != startClock || state.state != OrbState.revealing) {
+        timer.cancel();
+        return;
+      }
+
+      elapsed += interval.inMilliseconds;
+      final progress = (elapsed / duration.inMilliseconds).clamp(0.0, 1.0);
+      final curvedProgress = 1.0 - math.pow(1.0 - progress, 3);
+      final newIntensity = 1.0 - (curvedProgress * 0.6);
+      
+      state = state.copyWith(nebulaIntensity: newIntensity);
+
+      if (progress >= 1.0) {
+        timer.cancel();
       }
     });
   }
 
   void _dismissAnswer() {
-    _lastInteractionEnd = DateTime.now();
     state = state.copyWith(
       state: OrbState.idle,
       revealedAnswer: null,
       turbulence: 0.0,
+      nebulaIntensity: 0.25,
     );
+  }
+
+  void simulateManualShake() {
+    _cleanupTimers();
+    final newClock = state.manifestationClock + 1;
+    state = state.copyWith(
+      state: OrbState.chaotic,
+      turbulence: 1.0,
+      revealedAnswer: null,
+      revealSeed: math.Random().nextDouble(), 
+      manifestationClock: newClock, 
+      nebulaIntensity: 0.9, // Ultra vivid start
+    );
+    _startDampening();
   }
 
   void toggleHistory() {
@@ -180,13 +216,11 @@ class OrbController extends StateNotifier<OrbAnimationState> {
   @override
   void dispose() {
     _sensorSub?.cancel();
-    _dampeningTimer?.cancel();
-    _dismissalTimer?.cancel();
+    _cleanupTimers();
     super.dispose();
   }
 }
 
-/// Provider for the OrbController.
 final orbControllerProvider = StateNotifierProvider<OrbController, OrbAnimationState>((ref) {
   final service = SensorService();
   return OrbController(service)..init();

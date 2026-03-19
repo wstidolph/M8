@@ -4,14 +4,15 @@ import '../../domain/answer_source.dart';
 
 /// Fetches dynamic answers from a Supabase 'dynamic_answers' table.
 class SupabaseAnswerProvider implements AnswerSource {
-  final SupabaseClient _client = Supabase.instance.client;
-
   @override
   String get sourceId => 'supabase';
+
+  SupabaseClient get _client => Supabase.instance.client;
 
   @override
   Future<List<Answer>> getAnswers() async {
     try {
+      // Lazy access to the initialized client
       final List<dynamic> data = await _client
           .from('dynamic_answers')
           .select()

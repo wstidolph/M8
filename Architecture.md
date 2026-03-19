@@ -92,10 +92,12 @@ Implementation is tracked via the numbering system in `/specs`.
 | 006 | Author Core Dash (Auth, Sim) | ✅ Complete |
 | 008 | Library & Gifting History | ✅ Complete |
 | 009 | Parental Review Gateway | ✅ Complete |
+| 010 | Invitation accepting (Shake) | ✅ Complete |
 | 011 | Payments (Mock Phase 1) | ✅ Complete |
 | 012 | User Connectivity (SMS/Resend) | ✅ Complete |
-| 013 | Social Sharing (Mystic Assets) | 🚀 Phase 2 |
+| 013 | Demonstration Mode (Mock) | 📅 Phase 1 |
+| 014 | Social Sharing (Mystic Assets) | 🚀 Phase 2 |
 
 ---
-*Document Version: 1.1*
+*Document Version: 1.2*
 *Last Updated: 2026-03-19*

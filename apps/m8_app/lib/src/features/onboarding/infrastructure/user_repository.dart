@@ -22,5 +22,10 @@ final userRepositoryProvider = Provider<UserRepository>((ref) => UserRepository(
 /// Async notifier for age verification status.
 final ageVerificationStatusProvider = FutureProvider<bool>((ref) async {
   final repo = ref.watch(userRepositoryProvider);
-  return repo.isAgeVerified();
+  try {
+    return await repo.isAgeVerified().timeout(const Duration(milliseconds: 1500));
+  } catch (e) {
+    print('Age check timed out or failed: $e. Defaulting to gateway.');
+    return false;
+  }
 });

@@ -2,8 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../presentation/orb_controller.dart';
+import '../orb_controller.dart';
 import '../../../responses/presentation/invitation_controller.dart';
 import '../../../responses/infrastructure/answer_repository.dart';
 import '../../infrastructure/sensor_service.dart';
@@ -41,7 +40,6 @@ class _InvitationOverlayState extends ConsumerState<InvitationOverlay> {
     if (progress.answers != null && progress.label != null) {
       HapticFeedback.mediumImpact();
       await ref.read(answerRepositoryProvider).setCustomAnswers(progress.answers!, progress.label!);
-      // Refresh the pool in the Orb UI
       await ref.read(orbControllerProvider.notifier).refreshAnswers();
       ref.read(invitationControllerProvider.notifier).clear();
     }
@@ -72,8 +70,8 @@ class _InvitationOverlayState extends ConsumerState<InvitationOverlay> {
             boxShadow: [
               BoxShadow(
                 color: isGated ? Colors.orange.withOpacity(0.1) : Colors.blue.withOpacity(0.1),
-                blurRadius: 40,
-                spreadRadius: 10,
+                blurRadius: 40.0,
+                spreadRadius: 10.0,
               )
             ],
           ),
@@ -82,17 +80,18 @@ class _InvitationOverlayState extends ConsumerState<InvitationOverlay> {
             children: [
               Icon(
                 isGated ? Icons.security : Icons.celebration,
-                size: 48,
+                size: 48.0,
                 color: isGated ? Colors.orange : Colors.blue,
               ),
               const SizedBox(height: 24),
               Text(
                 isGated ? "Waiting for Approval" : "New from ${progress.label ?? 'a Friend'}!",
                 textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
+                style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 22,
+                  fontSize: 22.0,
                   fontWeight: FontWeight.bold,
+                  fontFamily: 'Outfit', // Fallback to system if not loaded
                 ),
               ),
               const SizedBox(height: 12),
@@ -101,14 +100,15 @@ class _InvitationOverlayState extends ConsumerState<InvitationOverlay> {
                   ? "This content is pending parental review. We'll let you know when it's ready!"
                   : "A custom set of mystical responses has been gifted to you.",
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
-                  color: const Color(0xFF94A3B8), // slate-400
-                  fontSize: 14,
+                style: const TextStyle(
+                  color: Color(0xFF94A3B8), // slate-400
+                  fontSize: 14.0,
+                  fontFamily: 'Inter',
                 ),
               ),
               const SizedBox(height: 40),
               if (!isGated) ...[
-                _InstructionRow(
+                const _InstructionRow(
                   icon: Icons.vibration,
                   label: "Light Shake to Accept",
                   color: Colors.blue,
@@ -154,15 +154,16 @@ class _InstructionRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(icon, size: 16, color: color),
+        Icon(icon, size: 16.0, color: color),
         const SizedBox(width: 8),
         Text(
           label.toUpperCase(),
-          style: GoogleFonts.inter(
+          style: TextStyle(
             color: color,
-            fontSize: 10,
+            fontSize: 10.0,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.2,
+            fontFamily: 'Inter',
           ),
         ),
       ],

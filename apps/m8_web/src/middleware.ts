@@ -1,29 +1,61 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { createServerClient } from "@supabase/ssr"
+import { NextResponse, type NextRequest } from "next/server"
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            request.cookies.set(name, value)
+          )
+          response = NextResponse.next({
+            request,
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
 
   const {
     data: { session },
   } = await supabase.auth.getSession()
 
-  // Protect dashboard routes
-  // Note: For now, we allow the root "/" as it's the main creator page, 
-  // but we might want to protect it if it contains sensitive author data.
-  // The US1 says "Author Dashboard", which is usually the root in our case.
-  
-  if (!session && (req.nextUrl.pathname === '/' || req.nextUrl.pathname.startsWith('/dashboard'))) {
-    const url = req.nextUrl.clone()
+  // Protect Dashboard subroutes: Redirect to /auth if no session
+  // Note: Root path (/) is exempt to allow for Demo Mode setup (Toolbox access)
+  if (!session && (request.nextUrl.pathname.startsWith('/dashboard'))) {
+    const url = request.nextUrl.clone()
     url.pathname = '/auth'
     return NextResponse.redirect(url)
   }
 
-  return res
+  return response
 }
 
 export const config = {
-  matcher: ['/', '/dashboard/:path*'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - auth (auth routes)
+     * - guardian (guardian portal)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|auth|guardian).*)',
+  ],
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -24,6 +25,10 @@ class _AgeVerificationPageState extends ConsumerState<AgeVerificationPage> {
   }
 
   Future<void> _checkStatus() async {
+    if (kIsWeb) {
+      if (mounted) setState(() => _isVerifying = false);
+      return;
+    }
     final status = await ref.read(ageVerificationStatusProvider.future);
     if (mounted) {
       setState(() {
@@ -35,7 +40,17 @@ class _AgeVerificationPageState extends ConsumerState<AgeVerificationPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isVerifying) return const Scaffold(backgroundColor: Color(0xFF000814));
+    if (_isVerifying) {
+      return const Scaffold(
+        backgroundColor: Color(0xFF000814),
+        body: Center(
+          child: CircularProgressIndicator(
+            strokeWidth: 1,
+            color: Colors.blue,
+          ),
+        ),
+      );
+    }
     if (_isAccepted) return widget.child;
 
     return Scaffold(

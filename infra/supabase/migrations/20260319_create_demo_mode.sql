@@ -36,15 +36,21 @@ BEGIN
     DELETE FROM public.answer_sets;
     DELETE FROM public.demo_notifications;
 
-    -- 2. Identified Seed Author (Expert Author persona)
+    -- 2. Ensure Seed Author is confirmed and identified
+    UPDATE auth.users SET email_confirmed_at = NOW() WHERE email = 'john@m8.com';
+
     v_author_id := (SELECT id FROM profiles WHERE email = 'john@m8.com' LIMIT 1);
     
     IF v_author_id IS NULL THEN
         -- If user doesn't exist, we skip seeding sets but return success
-        RETURN jsonb_build_object('success', true, 'message', 'Tables cleared. Seed persona not found.');
+        RETURN jsonb_build_object('success', true, 'message', 'Tables cleared. (Author profile not found; sign up as john@m8.com then reset again)');
     END IF;
 
-    -- 3. Seed "Standard Set"
+    -- 3. Intercept Reset Notification
+    INSERT INTO public.demo_notifications (recipient, type, body)
+    VALUES ('john@m8.com', 'AUTH_BYPASS', 'Mystical Reset triggered: john@m8.com has been automatically confirmed.');
+
+    -- 4. Seed "Standard Set"
     v_set_id := gen_random_uuid();
     INSERT INTO public.answer_sets (set_id, author_id, label, status, target_method)
     VALUES (v_set_id, v_author_id, 'Standard Set', 'ACTIVE', 'SMS');

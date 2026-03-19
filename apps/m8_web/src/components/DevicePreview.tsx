@@ -14,13 +14,15 @@ export const DevicePreview: React.FC<DevicePreviewProps> = ({ text, profile, isP
   // Config for different profiles
   const profiles = {
     phone: {
-      width: "360px", // 9:16 Alignment (Feature 006)
+      width: "360px",
       height: "640px",
       radius: "3rem",
       border: "8px",
       orbSize: "w-64 h-64",
       windowSize: "w-32 h-32",
-      fontSize: "text-[10px]",
+      windowMargin: "mt-11", // Nudge down even more for width
+      maxTextWidth: "max-w-[70%]", // Relax width slightly
+      fontSize: "text-[8px]", // Standardize at 8px for stability
     },
     watch: {
       width: "300px",
@@ -29,7 +31,9 @@ export const DevicePreview: React.FC<DevicePreviewProps> = ({ text, profile, isP
       border: "12px",
       orbSize: "w-56 h-56",
       windowSize: "w-28 h-28",
-      fontSize: "text-[9px]",
+      windowMargin: "mt-9",
+      maxTextWidth: "max-w-[65%]",
+      fontSize: "text-[7.5px]",
       isCircular: true,
     },
     desktop: {
@@ -39,7 +43,9 @@ export const DevicePreview: React.FC<DevicePreviewProps> = ({ text, profile, isP
       border: "4px",
       orbSize: "w-48 h-48",
       windowSize: "w-24 h-24",
-      fontSize: "text-[8px]",
+      windowMargin: "mt-12",
+      maxTextWidth: "max-w-[75%]",
+      fontSize: "text-[6.5px]",
     }
   };
 
@@ -80,7 +86,7 @@ export const DevicePreview: React.FC<DevicePreviewProps> = ({ text, profile, isP
                 className="absolute inset-0 bg-blue-950/80 border border-blue-500/30 shadow-inner flex items-center justify-center p-2"
                 style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
               >
-                <p className={`text-blue-100 font-bold text-center leading-tight tracking-wider font-outfit drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] mt-6 ${config.fontSize} wrap-break-word uppercase max-w-[80%] mx-auto opacity-90 transition-all duration-300`}>
+                <p className={`text-blue-100 font-bold text-center leading-tight tracking-wider font-outfit drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] ${config.windowMargin} ${text.length > 20 ? 'text-[7px] break-all' : config.fontSize + ' break-words'} ${config.maxTextWidth} uppercase mx-auto opacity-90 transition-all duration-300`}>
                   {text || "SEARCHING..."}
                 </p>
               </div>

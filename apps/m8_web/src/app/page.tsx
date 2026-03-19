@@ -92,6 +92,22 @@ export default function AuthorDashboard() {
     if (data) setGifts(data as unknown as Gift[]);
   };
 
+  const fetchTransactions = async () => {
+    const { data } = await supabase
+      .from('transactions')
+      .select('txn_id:id, amount, status, created_at, provider, gifts(answer_sets(label))')
+      .eq('user_id', user?.id)
+      .order('created_at', { ascending: false });
+    
+    if (data) {
+      const formatted = data.map((t: any) => ({
+        ...t,
+        gift_label: t.gifts?.answer_sets?.label
+      }));
+      setTransactions(formatted as Transaction[]);
+    }
+  };
+
   const handleRevokeGift = async (giftId: string) => {
     if (confirm("Revoke this gift? The Questioner will no longer be able to use these answers.")) {
       await supabase.from('gifts').update({ status: 'DELETED' }).eq('gift_id', giftId);
@@ -167,6 +183,21 @@ export default function AuthorDashboard() {
     setAnswers(Array(8).fill(""));
     setLabel("");
     setTargetContact("");
+  };
+
+  const handleLoadCommon = () => {
+    const common = [
+      "Yes, absolutely",
+      "It is decidedly so",
+      "Without a doubt",
+      "Yes - definitely",
+      "Reply hazy, try again",
+      "Ask again later",
+      "Don't count on it",
+      "My sources say no"
+    ];
+    setAnswers(common);
+    setLabel("Classic Mystic Set");
   };
 
   const handleAnswerChange = (index: number, value: string) => {
@@ -378,23 +409,6 @@ export default function AuthorDashboard() {
     }
   };
 
-  const fetchTransactions = async () => {
-    if (!user) return;
-    const { data } = await supabase
-      .from('transactions')
-      .select('*, gifts(answer_sets(label))')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-    
-    if (data) {
-      const formatted = data.map(txn => ({
-        ...txn,
-        gift_label: (txn.gifts as any)?.AnswerSets?.label
-      })) as Transaction[];
-      setTransactions(formatted);
-    }
-  };
-
   // The text currently shown in the "Orb" preview
   const previewText = answers[activePreviewIndex] || "Your answer here";
 
@@ -548,7 +562,10 @@ export default function AuthorDashboard() {
                       <h2 className="text-xl font-semibold text-slate-200">The 8 Answers</h2>
                       <p className="text-sm text-slate-400 mt-1">Keep it punchy. Max 70 characters each.</p>
                     </div>
-                    <button className="text-sm text-blue-400 hover:text-blue-300 font-medium">
+                    <button 
+                      onClick={handleLoadCommon}
+                      className="text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                    >
                       Load Common Answers
                     </button>
                   </div>

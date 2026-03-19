@@ -1,4 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../infrastructure/answer_repository.dart';
 
 enum InvitationStatus { none, pending, gated, accepted, rejected }
 
@@ -31,7 +34,49 @@ class InvitationProgress {
 }
 
 class InvitationController extends StateNotifier<InvitationProgress> {
-  InvitationController() : super(const InvitationProgress());
+  final _supabase = Supabase.instance.client;
+
+  InvitationController() : super(const InvitationProgress()) {
+    _initDeepLinks();
+  }
+
+  void _initDeepLinks() {
+    if (kIsWeb) {
+      // Direct URL check for browser simulation
+      final uri = Uri.base;
+      final giftId = uri.queryParameters['gift'];
+      if (giftId != null) {
+        fetchGift(giftId);
+      }
+    }
+  }
+
+  Future<void> fetchGift(String giftId) async {
+    try {
+      final res = await _supabase
+          .from('gifts')
+          .select('*, answer_sets(*, answers(*))')
+          .eq('gift_id', giftId)
+          .single();
+
+      if (res != null) {
+        final List<dynamic> rawAnswers = res['answer_sets']['answers'];
+        final List<String> textAnswers = rawAnswers
+            .map((a) => a['response_text'] as String)
+            .toList();
+        
+        state = state.copyWith(
+          status: InvitationStatus.pending,
+          giftId: giftId,
+          label: res['answer_sets']['label'],
+          answers: textAnswers,
+        );
+      }
+    } catch (e) {
+      // Silent fail for demo stability
+      print('Gift fetch failed: $e');
+    }
+  }
 
   void setPending({required String giftId, required String label, required List<String> answers}) {
     state = state.copyWith(
