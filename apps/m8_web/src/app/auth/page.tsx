@@ -8,10 +8,16 @@ import Link from "next/link";
 export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [dob, setDob] = useState("");
+  const [guardianEmail, setGuardianEmail] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // Age Calculation for UX
+  const age = dob ? Math.floor((new Date().getTime() - new Date(dob).getTime()) / 31557600000) : null;
+  const isUnderage = age !== null && age < 13;
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,11 +26,20 @@ export default function AuthPage() {
 
     try {
       if (isSignUp) {
+        if (isUnderage && !guardianEmail) {
+          throw new Error("Parental Guardian Email is required for users under 13.");
+        }
+
         const { error: signUpError } = await supabase.auth.signUp({ 
           email, 
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: {
+              date_of_birth: dob,
+              guardian_email: guardianEmail || null,
+              is_age_verified: true,
+            }
           }
         });
         if (signUpError) throw signUpError;
@@ -92,6 +107,39 @@ export default function AuthPage() {
               className="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             />
           </div>
+
+          {isSignUp && (
+            <div className="grid grid-cols-1 gap-4 pt-2">
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-2">Birthdate (Age Verification)</label>
+                <input 
+                  type="date" 
+                  required={isSignUp}
+                  value={dob}
+                  onChange={(e) => setDob(e.target.value)}
+                  className="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                />
+              </div>
+              {isUnderage && (
+                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                  <label className="block text-sm text-orange-400 mb-2 uppercase tracking-widest text-[10px] font-bold">
+                    Guardian Email (Required Under 13)
+                  </label>
+                  <input 
+                    type="email" 
+                    required={isUnderage}
+                    placeholder="Parent/Guardian Email"
+                    value={guardianEmail}
+                    onChange={(e) => setGuardianEmail(e.target.value)}
+                    className="w-full bg-orange-900/10 border border-orange-500/30 rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-2">
+                    M8 adheres to COPPA requirements. Gifted content requires parental approval.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           <button 
             type="submit"

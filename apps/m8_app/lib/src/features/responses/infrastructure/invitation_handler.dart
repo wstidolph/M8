@@ -3,7 +3,7 @@ import 'package:app_links/app_links.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'answer_repository.dart';
+import '../presentation/invitation_controller.dart';
 
 final invitationHandlerProvider = Provider((ref) => InvitationHandler(ref));
 
@@ -36,27 +36,49 @@ class InvitationHandler {
     }
   }
 
-  Future<void> _acceptInvitation(String setId) async {
+  Future<void> _acceptInvitation(String giftOrSetId) async {
     final supabase = Supabase.instance.client;
     
     try {
-      // 1. Fetch the custom Answer Set (Feature 007)
-      final response = await supabase
-          .from('answer_sets')
-          .select('*, answers(*)')
-          .eq('set_id', setId)
-          .single();
+      // 1. Fetch the Gift Entry to check status (Feature 009)
+      final giftResponse = await supabase
+          .from('gifts')
+          .select('*, answer_sets(*, answers(*))')
+          .filter('gift_id', 'eq', giftOrSetId)
+          .maybeSingle();
 
-      final answers = (response['answers'] as List)
+      if (giftResponse == null) {
+        debugPrint('Gift not found: $giftOrSetId');
+        return;
+      }
+
+      final status = giftResponse['status'] as String;
+      
+      if (status == 'PENDING_REVIEW') {
+        _ref.read(invitationControllerProvider.notifier).setGated(giftId: giftOrSetId);
+        return;
+      }
+
+      if (status != 'ACTIVE') {
+        debugPrint('M8 Invitation is no longer active ($status).');
+        return;
+      }
+
+      final set = giftResponse['answer_sets'];
+      final List<String> answers = (set['answers'] as List)
             .map((a) => a['response_text'] as String)
             .toList();
 
-        final label = response['label'] as String;
+      final label = set['label'] as String;
 
-        // 2. Cache it locally via AnswerRepository (Principle III)
-        await _ref.read(answerRepositoryProvider).setCustomAnswers(answers, label);
-        
-        debugPrint('Successfully accepted M8 invitation: $label');
+      // 2. Set Pending (Feature 010) - User must manually accept via shake
+      _ref.read(invitationControllerProvider.notifier).setPending(
+        giftId: giftOrSetId,
+        label: label,
+        answers: answers,
+      );
+      
+      debugPrint('M8 Invitation loaded and pending acceptance: $label');
     } catch (e) {
       debugPrint('Failed to accept M8 invitation: $e');
     }

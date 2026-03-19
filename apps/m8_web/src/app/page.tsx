@@ -251,14 +251,29 @@ export default function AuthorDashboard() {
         if (answersError) throw answersError;
       }
 
-      // 2. Create the Gift Instance (The actual delivery)
+      // 2. Check for Parental Review (US2)
+      let initialStatus = 'ACTIVE';
+      const { data: recipientProfile } = await supabase
+        .from('profiles')
+        .select('date_of_birth')
+        .eq('email', targetContact)
+        .single();
+      
+      if (recipientProfile?.date_of_birth) {
+        const age = Math.floor((new Date().getTime() - new Date(recipientProfile.date_of_birth).getTime()) / 31557600000);
+        if (age < 13) {
+          initialStatus = 'PENDING_REVIEW';
+        }
+      }
+
+      // 3. Create the Gift Instance (The actual delivery)
       const giftId = crypto.randomUUID();
       const { error: giftError } = await supabase.from('gifts').insert({
         gift_id: giftId,
         set_id: setId,
         author_id: user.id,
         target_contact: targetContact,
-        status: 'ACTIVE'
+        status: initialStatus
       });
 
       if (giftError) throw giftError;

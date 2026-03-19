@@ -4,6 +4,7 @@ import 'orb_controller.dart';
 import 'orb_painter.dart';
 import 'components/answer_visual.dart';
 import 'components/history_drawer.dart';
+import 'components/invitation_overlay.dart';
 import '../domain/orb_state.dart';
 
 /// The primary Questioner view for the M8 orb experience.
@@ -98,6 +99,9 @@ class _OrbViewState extends ConsumerState<OrbView> with SingleTickerProviderStat
                  history: orbState.history,
                  onClose: () => ref.read(orbControllerProvider.notifier).toggleHistory(),
                ),
+            
+            // 6. Invitation acceptance / Gating (US4/Feature 010)
+            const InvitationOverlay(),
           ],
         ),
       ),
