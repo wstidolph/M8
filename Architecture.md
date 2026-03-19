@@ -88,7 +88,7 @@ Implementation is tracked via the numbering system in `/specs`.
 | 006 | Author Core Dash (Auth, Sim) | ✅ Complete |
 | 008 | Library & Gifting History | ✅ Complete |
 | 009 | Parental Review Gateway | ✅ Complete |
-| 011 | Stripe Payments | 📅 Phase 1 (Next) |
+| 011 | Payments (Mock Phase 1) | 📅 In Progress |
 | 012 | Social Sharing (Mystic Assets) | 🚀 Phase 2 |
 
 ---

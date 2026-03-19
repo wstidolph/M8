@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../presentation/orb_controller.dart';
 import '../../../responses/presentation/invitation_controller.dart';
 import '../../../responses/infrastructure/answer_repository.dart';
 import '../../infrastructure/sensor_service.dart';
@@ -40,6 +41,8 @@ class _InvitationOverlayState extends ConsumerState<InvitationOverlay> {
     if (progress.answers != null && progress.label != null) {
       HapticFeedback.mediumImpact();
       await ref.read(answerRepositoryProvider).setCustomAnswers(progress.answers!, progress.label!);
+      // Refresh the pool in the Orb UI
+      await ref.read(orbControllerProvider.notifier).refreshAnswers();
       ref.read(invitationControllerProvider.notifier).clear();
     }
   }

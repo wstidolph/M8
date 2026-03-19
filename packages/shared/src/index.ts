@@ -1,82 +1,89 @@
 import { z } from "zod";
 
 // ==========================================
-// 1. User
+// 1. User & Profiles
 // ==========================================
 export const UserRoleEnum = z.enum(["AUTHOR", "QUESTIONER", "ADMIN"]);
 export type UserRole = z.infer<typeof UserRoleEnum>;
 
-export const AuthMethodEnum = z.enum(["EMAIL", "PHONE", "OAUTH"]);
-export type AuthMethod = z.infer<typeof AuthMethodEnum>;
-
-export const UserSchema = z.object({
-  user_id: z.string().uuid(),
-  auth_method: AuthMethodEnum,
-  email_address: z.string().email().optional(),
-  phone_number: z.string().optional(),
-  role: UserRoleEnum,
-  is_underage: z.boolean().default(false),
-  date_of_birth: z.coerce.date().optional(),
-  created_at: z.coerce.date(),
-  last_login: z.coerce.date().optional(),
+export const ProfileSchema = z.object({
+  id: z.string().uuid(),
+  date_of_birth: z.string().optional(), // ISO string from DB
+  guardian_email: z.string().email().optional(),
+  created_at: z.string(),
 });
-export type User = z.infer<typeof UserSchema>;
+export type Profile = z.infer<typeof ProfileSchema>;
 
 // ==========================================
-// 2. AnswerSet
+// 2. AnswerSet (The mystical content container)
 // ==========================================
 export const TargetMethodEnum = z.enum(["EMAIL", "PHONE"]);
 export type TargetMethod = z.infer<typeof TargetMethodEnum>;
 
-export const AnswerSetStatusEnum = z.enum([
-  "DRAFT",
-  "PAID",
-  "PENDING_REVIEW", // Used when Questioner is underage
-  "SENT",
-  "ACCEPTED",
-  "REJECTED",
-]);
+export const AnswerSetStatusEnum = z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]);
 export type AnswerSetStatus = z.infer<typeof AnswerSetStatusEnum>;
 
 export const AnswerSetSchema = z.object({
   set_id: z.string().uuid(),
-  author_id: z.string().uuid(), // FK to User
+  author_id: z.string().uuid(),
   target_method: TargetMethodEnum,
   label: z.string().max(255),
   status: AnswerSetStatusEnum,
-  expiration_date: z.coerce.date().optional(),
-  created_at: z.coerce.date(),
+  created_at: z.string(),
+  updated_at: z.string(),
 });
 export type AnswerSet = z.infer<typeof AnswerSetSchema>;
 
 // ==========================================
-// 3. Answer
+// 3. Answer (Individual responses)
 // ==========================================
 export const AnswerSchema = z.object({
   answer_id: z.string().uuid(),
-  set_id: z.string().uuid(), // FK to AnswerSet
-  response_text: z.string().max(70, "Response text must be 70 characters or less"), // PRD strict limit
-  associated_question: z.string().max(255).optional(),
-  sequence_order: z.number().int().min(0).max(7), // Max 8 answers (0-7 indexes)
+  set_id: z.string().uuid(),
+  response_text: z.string().max(70, "Response text must be 70 characters or less"),
+  sequence_order: z.number().int().min(0).max(7),
 });
 export type Answer = z.infer<typeof AnswerSchema>;
 
 // ==========================================
-// 4. Invitation / Transaction
+// 4. Gift (The invitation/distribution instance)
 // ==========================================
-export const PaymentStatusEnum = z.enum(["PENDING", "COMPLETED", "FAILED"]);
-export type PaymentStatus = z.infer<typeof PaymentStatusEnum>;
+export const GiftStatusEnum = z.enum([
+  "PENDING_REVIEW", // Age-gated approval tank (F009)
+  "ACTIVE",         // Ready for Questioner acceptance (F010)
+  "ACCEPTED",       // Questioner has accepted the gift
+  "REJECTED",       // Questioner has declined
+  "DELETED",        // Author has revoked access
+  "EXPIRED",        // Time-out
+]);
+export type GiftStatus = z.infer<typeof GiftStatusEnum>;
 
-export const DeliveryStatusEnum = z.enum(["QUEUED", "SENT", "DELIVERED", "FAILED"]);
-export type DeliveryStatus = z.infer<typeof DeliveryStatusEnum>;
-
-export const InvitationSchema = z.object({
-  invite_id: z.string().uuid(),
-  set_id: z.string().uuid(), // FK to AnswerSet
-  target_contact: z.string(), // E.g. phone number string or email address
-  deep_link_url: z.string().url(),
-  payment_status: PaymentStatusEnum,
-  delivery_status: DeliveryStatusEnum,
-  sent_at: z.coerce.date().optional(),
+export const GiftSchema = z.object({
+  gift_id: z.string().uuid(),
+  set_id: z.string().uuid(),
+  author_id: z.string().uuid(),
+  target_contact: z.string(),
+  status: GiftStatusEnum,
+  sent_at: z.string(),
+  expires_at: z.string().nullable(),
+  reviewed_at: z.string().nullable(),
+  reviewed_by: z.string().nullable(),
 });
-export type Invitation = z.infer<typeof InvitationSchema>;
+export type Gift = z.infer<typeof GiftSchema>;
+
+// ==========================================
+// 5. Transaction (Payments F011)
+// ==========================================
+export const TransactionStatusEnum = z.enum(["PENDING", "SUCCEEDED", "FAILED"]);
+export type TransactionStatus = z.infer<typeof TransactionStatusEnum>;
+
+export const TransactionSchema = z.object({
+  txn_id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  gift_id: z.string().uuid(),
+  amount: z.number(),
+  provider: z.string(), // e.g., 'STRIPE', 'MOCK'
+  status: TransactionStatusEnum,
+  created_at: z.string(),
+});
+export type Transaction = z.infer<typeof TransactionSchema>;

@@ -75,6 +75,10 @@ class OrbController extends StateNotifier<OrbAnimationState> {
     });
   }
 
+  Future<void> refreshAnswers() async {
+    _answerPool = await _repository.getActivePool();
+  }
+
   void _handleSensorInput(ShakeIntensity intensity) {
     // 1. Workflow [/sensor-calibration]: Debounce after interaction (500ms)
     final now = DateTime.now();

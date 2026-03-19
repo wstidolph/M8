@@ -11,12 +11,6 @@ function ApproveContent() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    if (giftId) {
-      fetchGift();
-    }
-  }, [giftId]);
-
   const fetchGift = async () => {
     const { data } = await supabase
       .from("gifts")
@@ -27,6 +21,12 @@ function ApproveContent() {
     setGift(data);
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (giftId) {
+      fetchGift();
+    }
+  }, [giftId]);
 
   const handleApprove = async () => {
     const { error } = await supabase

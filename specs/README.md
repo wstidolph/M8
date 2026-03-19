@@ -15,6 +15,7 @@ This directory contains the technical specifications and implementation plans fo
 | 008 | [Author Library](./008-author-library) | 7.1 | AnswerSet templates, cloning, and gifting history. | ✅ Complete |
 | 009 | [Parental Review](./009-parental-review-gateway) | 4.3 | Age verification (DOB), Gated gifts, and Guardian portal. | ✅ Complete |
 | 010 | [Invitation Flow](./010-flutter-invitation-acceptance) | 7.2 | Flutter-side gesture acceptance (Shake to Accept). | ✅ Complete |
+| 011 | [Payments](./011-payments) | 6 | Mocked transaction workflow & $2/set monetization. | 📅 In Progress |
 
 ---
 

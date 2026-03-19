@@ -1,4 +1,20 @@
+"use client";
+
 import { useState, useEffect } from "react";
+import { MockPaymentModal } from "@/components/MockPaymentModal";
+import { validateAnswerSet } from "@/lib/profanity";
+import { 
+  PlusCircle, 
+  Trash2, 
+  RefreshCcw, 
+  User as UserIcon, 
+  LogOut, 
+  ChevronRight, 
+  Library,
+  CreditCard,
+  Settings,
+  ShieldAlert
+} from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { AnswerSetStatusEnum, TargetMethodEnum } from "@m8/shared";
@@ -7,13 +23,18 @@ import { DevicePreview, DeviceProfile } from "@/components/DevicePreview";
 import { LibrarySidebar, AnswerSet } from "@/components/LibrarySidebar";
 import { GiftsLog, Gift } from "@/components/GiftsLog";
 
-type DashboardView = "CREATE" | "HISTORY";
+import { TransactionsLog, Transaction } from "@/components/TransactionsLog";
+
+type DashboardView = "CREATE" | "HISTORY" | "TRANSACTIONS";
 
 export default function AuthorDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [view, setView] = useState<DashboardView>("CREATE");
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [pendingPayment, setPendingPayment] = useState<{giftId: string, initialStatus: string} | null>(null);
   const [librarySets, setLibrarySets] = useState<AnswerSet[]>([]);
   const [gifts, setGifts] = useState<Gift[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activeSetId, setActiveSetId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<string[]>(Array(8).fill(""));
   const [targetContact, setTargetContact] = useState("");
@@ -41,15 +62,17 @@ export default function AuthorDashboard() {
     if (user) {
       fetchLibrary();
       fetchGifts();
+      fetchTransactions();
     } else {
       setLibrarySets([]);
       setGifts([]);
+      setTransactions([]);
     }
   }, [user]);
 
   const fetchLibrary = async () => {
     const { data } = await supabase
-      .from('AnswerSets')
+      .from('answer_sets')
       .select('*')
       .eq('author_id', user?.id)
       .eq('is_deleted', false)
@@ -61,7 +84,7 @@ export default function AuthorDashboard() {
   const fetchGifts = async () => {
     const { data } = await supabase
       .from('gifts')
-      .select('*, AnswerSets(label)')
+      .select('*, answer_sets(label)')
       .eq('author_id', user?.id)
       .order('sent_at', { ascending: false });
     
@@ -77,7 +100,7 @@ export default function AuthorDashboard() {
 
   const loadSet = async (setId: string) => {
     const { data: answersData } = await supabase
-      .from('Answers')
+      .from('answers')
       .select('response_text, sequence_order')
       .eq('set_id', setId)
       .order('sequence_order', { ascending: true });
@@ -99,7 +122,7 @@ export default function AuthorDashboard() {
 
   const handleDeleteSet = async (setId: string) => {
     if (confirm("Are you sure you want to delete this mystical set? Existing gifts will remain active.")) {
-      await supabase.from('AnswerSets').update({ is_deleted: true }).eq('set_id', setId);
+      await supabase.from('answer_sets').update({ is_deleted: true }).eq('set_id', setId);
       fetchLibrary();
       if (activeSetId === setId) handleNewSet();
     }
@@ -108,7 +131,7 @@ export default function AuthorDashboard() {
   const handleCloneSet = async (set: AnswerSet) => {
     // 1. Create a copy with label change
     const newId = crypto.randomUUID();
-    const { error: setError } = await supabase.from('AnswerSets').insert({
+    const { error: setError } = await supabase.from('answer_sets').insert({
       set_id: newId,
       author_id: user?.id,
       label: `${set.label} (Copy)`,
@@ -120,7 +143,7 @@ export default function AuthorDashboard() {
 
     // 2. Load and Copy answers
     const { data: sourceAnswers } = await supabase
-      .from('Answers')
+      .from('answers')
       .select('response_text, sequence_order')
       .eq('set_id', set.set_id);
     
@@ -131,7 +154,7 @@ export default function AuthorDashboard() {
         response_text: a.response_text,
         sequence_order: a.sequence_order
       }));
-      await supabase.from('Answers').insert(copies);
+      await supabase.from('answers').insert(copies);
     }
 
     fetchLibrary();
@@ -171,13 +194,21 @@ export default function AuthorDashboard() {
     }
     
     setIsSubmitting(true);
+    // 1. Profanity Filter (Principle IV / PRD 56)
+    const { isValid, flagged } = validateAnswerSet(answers);
+    if (!isValid) {
+      alert(`Your mystical set contains inappropriate content ("${flagged}"). Please revise.`);
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const setId = activeSetId || crypto.randomUUID();
       const isEmail = targetContact.includes('@');
       const targetMethod = isEmail ? TargetMethodEnum.enum.EMAIL : TargetMethodEnum.enum.PHONE;
 
       // Upsert AnswerSet (Refactor T006.2)
-      const { error: setError } = await supabase.from('AnswerSets').upsert({
+      const { error: setError } = await supabase.from('answer_sets').upsert({
         set_id: setId,
         author_id: user.id,
         target_method: targetMethod,
@@ -189,7 +220,7 @@ export default function AuthorDashboard() {
       if (setError) throw setError;
 
       // Delete old and insert new answers (Clean slate upsert pattern)
-      await supabase.from('Answers').delete().eq('set_id', setId);
+      await supabase.from('answers').delete().eq('set_id', setId);
       
       const answersToInsert = answers.map((responseText, index) => ({
         answer_id: crypto.randomUUID(),
@@ -197,7 +228,7 @@ export default function AuthorDashboard() {
         response_text: responseText || "Concentrate and ask again",
         sequence_order: index,
       }));
-      await supabase.from('Answers').insert(answersToInsert);
+      await supabase.from('answers').insert(answersToInsert);
 
       setActiveSetId(setId);
       fetchLibrary();
@@ -223,6 +254,14 @@ export default function AuthorDashboard() {
     
     setIsSubmitting(true);
     
+    // 1. Profanity Filter (Principle IV / PRD 56)
+    const { isValid, flagged } = validateAnswerSet(answers);
+    if (!isValid) {
+      alert(`Your mystical set contains inappropriate content ("${flagged}"). Please revise.`);
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       let setId = activeSetId;
 
@@ -232,7 +271,7 @@ export default function AuthorDashboard() {
         const isEmail = targetContact.includes('@');
         const targetMethod = isEmail ? TargetMethodEnum.enum.EMAIL : TargetMethodEnum.enum.PHONE;
 
-        const { error: setError } = await supabase.from('AnswerSets').insert({
+        const { error: setError } = await supabase.from('answer_sets').insert({
           set_id: setId,
           author_id: user.id,
           target_method: targetMethod,
@@ -247,11 +286,11 @@ export default function AuthorDashboard() {
           response_text: responseText || "Concentrate and ask again",
           sequence_order: index,
         }));
-        const { error: answersError } = await supabase.from('Answers').insert(answersToInsert);
+        const { error: answersError } = await supabase.from('answers').insert(answersToInsert);
         if (answersError) throw answersError;
       }
 
-      // 2. Check for Parental Review (US2)
+      // 2. Check for Parental Review (Phase 1 Mock)
       let initialStatus = 'ACTIVE';
       const { data: recipientProfile } = await supabase
         .from('profiles')
@@ -266,8 +305,54 @@ export default function AuthorDashboard() {
         }
       }
 
-      // 3. Create the Gift Instance (The actual delivery)
-      const giftId = crypto.randomUUID();
+      // 3. Prepare for Payment (Phase 1 Mock)
+      setPendingPayment({
+        giftId: window.crypto.randomUUID(),
+        initialStatus: initialStatus
+      });
+      setIsPaymentModalOpen(true);
+      
+    } catch (e: any) {
+      console.error(e);
+      alert("Failed to prepare distribution: " + e.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCompletePayment = async () => {
+    if (!pendingPayment || !user) return;
+
+    try {
+      const { giftId, initialStatus } = pendingPayment;
+      let setId = activeSetId;
+
+      // 1. Create AnswerSet and Answers (Now that payment is "confirmed")
+      if (!setId) {
+        setId = window.crypto.randomUUID();
+        const isEmail = targetContact.includes('@');
+        const targetMethod = isEmail ? TargetMethodEnum.enum.EMAIL : TargetMethodEnum.enum.PHONE;
+
+        const { error: setError } = await supabase.from('answer_sets').insert({
+          set_id: setId,
+          author_id: user.id,
+          target_method: targetMethod,
+          label: label || "Mystic Responses",
+          status: 'ACTIVE',
+        });
+        if (setError) throw setError;
+
+        const answersToInsert = answers.map((responseText, index) => ({
+          answer_id: window.crypto.randomUUID(),
+          set_id: setId,
+          response_text: responseText || "Concentrate and ask again",
+          sequence_order: index,
+        }));
+        const { error: answersError } = await supabase.from('answers').insert(answersToInsert);
+        if (answersError) throw answersError;
+      }
+
+      // 2. Create the Gift Instance
       const { error: giftError } = await supabase.from('gifts').insert({
         gift_id: giftId,
         set_id: setId,
@@ -275,20 +360,45 @@ export default function AuthorDashboard() {
         target_contact: targetContact,
         status: initialStatus
       });
-
       if (giftError) throw giftError;
 
-      const deepLink = `m8ball://accept?id=${giftId}`;
-      alert(`Gift created! Distribution Link: ${deepLink}\n(Proceeding to Stripe Checkout simulation...)`);
-      
+      // 3. Record the Transaction (Phase 1 Mock)
+      const { error: txnError } = await supabase.from('transactions').insert({
+        txn_id: window.crypto.randomUUID(),
+        user_id: user.id,
+        gift_id: giftId,
+        amount: 2.00,
+        provider: 'MOCK',
+        status: 'SUCCEEDED'
+      });
+      if (txnError) throw txnError;
+
+      setIsPaymentModalOpen(false);
+      setPendingPayment(null);
       fetchLibrary();
       fetchGifts();
+      fetchTransactions();
       setView("HISTORY");
     } catch (e: any) {
       console.error(e);
-      alert("Failed to send gift: " + e.message);
-    } finally {
-      setIsSubmitting(false);
+      throw new Error("Transaction processing failed: " + e.message);
+    }
+  };
+
+  const fetchTransactions = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('transactions')
+      .select('*, gifts(answer_sets(label))')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    
+    if (data) {
+      const formatted = data.map(txn => ({
+        ...txn,
+        gift_label: (txn.gifts as any)?.AnswerSets?.label
+      })) as Transaction[];
+      setTransactions(formatted);
     }
   };
 
@@ -360,7 +470,15 @@ export default function AuthorDashboard() {
                   view === "HISTORY" ? "bg-blue-600 text-white shadow-lg" : "text-slate-500 hover:text-slate-300"
                 }`}
               >
-                HISTORY
+                GIFT LOG
+              </button>
+              <button 
+                onClick={() => setView("TRANSACTIONS")}
+                className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${
+                  view === "TRANSACTIONS" ? "bg-blue-600 text-white shadow-lg" : "text-slate-500 hover:text-slate-300"
+                }`}
+              >
+                PAYMENTS
               </button>
             </div>
 
@@ -512,13 +630,26 @@ export default function AuthorDashboard() {
                 </p>
               </div>
             </div>
-          ) : (
+          ) : view === "HISTORY" ? (
              <div className="flex-1 overflow-y-auto">
                 <GiftsLog gifts={gifts} onRevoke={handleRevokeGift} />
              </div>
+          ) : (
+              <div className="flex-1 overflow-y-auto px-6">
+                  <TransactionsLog transactions={transactions} />
+              </div>
           )}
         </div>
       </div>
+      <MockPaymentModal 
+        isOpen={isPaymentModalOpen}
+        amount={2.00}
+        onConfirm={handleCompletePayment}
+        onCancel={() => {
+          setIsPaymentModalOpen(false);
+          setPendingPayment(null);
+        }}
+      />
     </div>
   );
 }
