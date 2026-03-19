@@ -34,13 +34,34 @@ function ApproveContent() {
       .update({ 
         status: "ACTIVE",
         reviewed_at: new Date().toISOString(),
-        reviewed_by: "guardian-mock@m8.com" // Placeholder for real email tomorrow
+        reviewed_by: "guardian-mock@m8.com"
       })
       .eq("gift_id", giftId);
     
     if (error) alert(error.message);
     else {
-      alert("Gift approved! The Questioner can now accept these answers.");
+      alert("Gift approved!");
+      router.push("/");
+    }
+  };
+
+  const handleReject = async () => {
+    const reason = prompt("Optional: Why are these answers being rejected?");
+    if (reason === null) return; // Cancelled prompt
+
+    const { error } = await supabase
+      .from("gifts")
+      .update({ 
+        status: "REJECTED",
+        reviewed_at: new Date().toISOString(),
+        reviewed_by: "guardian-mock@m8.com",
+        rejection_reason: reason || "Content filtered by Guardian."
+      })
+      .eq("gift_id", giftId);
+    
+    if (error) alert(error.message);
+    else {
+      alert("Gift rejected. The Author will be notified.");
       router.push("/");
     }
   };
@@ -68,7 +89,7 @@ function ApproveContent() {
             Approve Answers
           </button>
           <button 
-            onClick={() => router.push("/")}
+            onClick={handleReject}
             className="px-8 bg-slate-800 hover:bg-slate-700 text-slate-300 py-4 rounded-xl font-bold transition-all"
           >
             Reject

@@ -39,6 +39,7 @@ graph TD
     subgraph "Clients"
         F[Flutter App - Questioner]
         N[Next.js Web - Author]
+        G[Next.js Web - Guardian]
         D[WatchOS/WearOS]
     end
 
@@ -51,15 +52,18 @@ graph TD
 
     subgraph "External"
         S[Stripe Payments]
-        M[Resend / Twilio]
+        M[Resend SMS/Email]
     end
 
     N -- OAuth --> Auth
     N -- Create Set --> DB
     N -- Checkout --> S
     S -- Webhook --> Edge
-    Edge -- Send Gift --> M
-    F -- Deep Link --> DB
+    DB -- DB Trigger --> Edge
+    Edge -- Send Notification --> M
+    M -- DeepLink --> F
+    M -- ReviewLink --> G
+    G -- Review Decision --> DB
     F -- Accept/Reject --> DB
     DB -- Filtered Access --> RLS
 ```
@@ -88,9 +92,10 @@ Implementation is tracked via the numbering system in `/specs`.
 | 006 | Author Core Dash (Auth, Sim) | ✅ Complete |
 | 008 | Library & Gifting History | ✅ Complete |
 | 009 | Parental Review Gateway | ✅ Complete |
-| 011 | Payments (Mock Phase 1) | 📅 In Progress |
-| 012 | Social Sharing (Mystic Assets) | 🚀 Phase 2 |
+| 011 | Payments (Mock Phase 1) | ✅ Complete |
+| 012 | User Connectivity (SMS/Resend) | ✅ Complete |
+| 013 | Social Sharing (Mystic Assets) | 🚀 Phase 2 |
 
 ---
-*Document Version: 1.0*
+*Document Version: 1.1*
 *Last Updated: 2026-03-19*

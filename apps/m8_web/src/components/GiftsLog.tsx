@@ -5,12 +5,13 @@ import React from "react";
 export interface Gift {
   gift_id: string;
   target_contact: string;
-  status: 'ACTIVE' | 'DELETED' | 'EXPIRED';
+  status: 'ACTIVE' | 'DELETED' | 'EXPIRED' | 'PENDING_REVIEW' | 'REJECTED';
   sent_at: string;
   expires_at: string;
   answer_sets: {
     label: string;
   };
+  rejection_reason?: string;
 }
 
 interface GiftsLogProps {
@@ -52,15 +53,24 @@ export const GiftsLog: React.FC<GiftsLogProps> = ({ gifts, onRevoke }) => {
                   {gift.target_contact}
                 </td>
                 <td className="py-4 px-4">
-                  <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
-                    gift.status === 'ACTIVE' 
-                      ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
-                      : gift.status === 'EXPIRED'
-                      ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20'
-                      : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                  }`}>
-                    {gift.status}
-                  </span>
+                  <div className="flex flex-col">
+                    <span className={`w-fit px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
+                      gift.status === 'ACTIVE' 
+                        ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
+                        : gift.status === 'EXPIRED'
+                        ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20'
+                        : gift.status === 'PENDING_REVIEW'
+                        ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    }`}>
+                      {gift.status}
+                    </span>
+                    {gift.status === 'REJECTED' && gift.rejection_reason && (
+                      <span className="text-[10px] text-red-500/70 mt-1 italic max-w-[120px] truncate" title={gift.rejection_reason}>
+                        Reason: {gift.rejection_reason}
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="py-4 px-4 text-xs text-slate-500">
                   {new Date(gift.sent_at).toLocaleDateString()}

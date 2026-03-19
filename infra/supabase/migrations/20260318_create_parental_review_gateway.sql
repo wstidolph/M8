@@ -67,3 +67,4 @@ BEGIN
     RETURN (dob > (CURRENT_DATE - INTERVAL '13 years'));
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+ALTER TABLE public.gifts ADD COLUMN IF NOT EXISTS rejection_reason TEXT;

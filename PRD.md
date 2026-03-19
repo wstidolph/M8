@@ -16,6 +16,11 @@
 * **Experience:** Uses a desktop application to sign in, craft, and test custom answer sets. They can simulate how the answers will appear on a target device. 
 * **Business Interaction:** Pays a small fee (e.g., $2) to submit a set of up to eight question/response pairs. They then label the set (e.g., "FromJohn") and send an invitation to a target Questioner via SMS (phone number) or email.
 
+**2.3 Guardian**
+* **Role:** A parent or legal guardian for underage Questioners.
+* **Experience:** Receives email notifications when a custom set is gifted to their child. Uses a lightweight "Review Portal" to inspect the 1-8 answers. 
+* **Business Interaction:** Acts as the "Compliance/Safety" gatekeeper. Can **Approve** (activating the gift) or **Reject** (returning the gift to the Author's dashboard with feedback).
+
 ## 3. Data Objects
 
 ### 3.1 User
@@ -92,6 +97,14 @@
    * Reload any valid Answer Set onto their device until its expiration date.
    * Review previously received Answer Sets even after they have expired (though reloading them is disabled).
    * Reset their M8 device back to the default original answers at any time.
+
+### 7.3 Guardian Flow (Content Review)
+1. **Notification:** When a gift is sent to an underage (<13) Questioner, the Guardian receives an automated email via Resend/Twilio.
+2. **Review Portal:** A zero-login, deep-linked interface allows the Guardian to see the 8 answers and the Author's label.
+3. **Decision Logic:** 
+   * **Approve:** The Gift status moves to `ACTIVE`. The Questioner is notified on their device to perform the "Accept Shake".
+   * **Reject:** The Guardian provides an optional reason. The Gift status moves to `REJECTED`. 
+4. **Author Feedback:** Rejections appear in the Author's Library, allowing them to edit and resend the mystical set.
 
 ## 8. Backend Architecture (Phase 1)
 To keep Phase 1 lean and cost-effective while leaving room for "social" scaling in Phase 2, the backend will be designed around a small initial footprint (target ~5,000 users). Expected load per user is very light: Authors will have <10 Questioners, and Questioners will hold <10 Answer Sets. 
