@@ -24,8 +24,11 @@ Flutter 3.x / Dart 3.x: Follow standard conventions
 ## Recent Changes
 
 - 001-orb-animation: Added Flutter 3.x / Dart 3.x + `sensors_plus`, `flutter_riverpod`
-- 002-dynamic-responses: Implemented Dynamic Answer Response Engine with Supabase sync and mood weighting.
-- 003-wearable-optimization: Optimized for WearOS/watchOS circular layouts and haptic sensory feedback.
+- 002-dynamic-responses: Implemented Dynamic Answer Response Engine.
+- 003-wearable-optimization: Optimized for WearOS/watchOS circular layouts.
+- 006-author-core: Implemented Author Dashboard with Supabase Auth & Zero UI Simulator.
+- 008-author-library: Added Library & Gifting (Drafts, Templates, and Sent History).
+- 009-parental-review: Implemented Age-Verification and Guardian Approval Gateway.
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
