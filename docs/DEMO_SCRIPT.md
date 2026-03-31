@@ -58,7 +58,7 @@ This script provides a step-by-step narrative for demonstrating the M8 Phase 1 e
 
 1.  **Flutter Acceptance**:
     *   Show the **Notification View** overlaying the Orb.
-    *   Demonstrate **Light Shake to Accept** vs **Violent Shake to Reject**.
+    *   Demonstrate **Light/Violent Shake** to trigger a "swim up" confirmation, then **Long-Touch** to finalize.
 2.  **The Interaction**:
     *   Perform a **Light Shake** to load the set.
     *   Perform a final **Question + Shake** to reveal John's custom answer floating to the surface.

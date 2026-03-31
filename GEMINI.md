@@ -27,6 +27,7 @@ Flutter 3.x / Dart 3.x: Follow standard conventions
 - 009-parental-review: Implemented Age-Verification and Guardian Approval Gateway.
 - 011-payments: Implemented Mocked Stripe transaction workflows for set gifting.
 - 012-user-connectivity: Integrated SMS and Email invitation flows for contacts.
+- 010-flutter-invitation-acceptance: Refined Accept/Reject with mystical swim-up confirmation and long-touch gestures.
 - 013-demonstration-mode: Commenced architectural planning for stakeholder seeds.
 
 <!-- MANUAL ADDITIONS START -->
