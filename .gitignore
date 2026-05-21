@@ -6,3 +6,5 @@ dist
 .next
 apps/m8_app/build
 .gemini/
+.agent/
+.graphify-out/
