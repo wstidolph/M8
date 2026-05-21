@@ -86,7 +86,7 @@ export const DevicePreview: React.FC<DevicePreviewProps> = ({ text, profile, isP
                 className="absolute inset-0 bg-blue-950/80 border border-blue-500/30 shadow-inner flex items-center justify-center p-2"
                 style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
               >
-                <p className={`text-blue-100 font-bold text-center leading-tight tracking-wider font-outfit drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] ${config.windowMargin} ${text.length > 20 ? 'text-[7px] break-all' : config.fontSize + ' break-words'} ${config.maxTextWidth} uppercase mx-auto opacity-90 transition-all duration-300`}>
+                <p className={`text-blue-100 font-bold text-center leading-tight tracking-wider font-outfit drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] ${config.windowMargin} ${text.length > 20 ? 'text-[7px] break-words' : config.fontSize + ' break-words'} ${config.maxTextWidth} uppercase mx-auto opacity-90 transition-all duration-300`}>
                   {text || "SEARCHING..."}
                 </p>
               </div>

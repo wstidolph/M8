@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../infrastructure/answer_repository.dart';
 
 enum InvitationStatus { none, pending, gated, accepted, rejected }
 
@@ -59,20 +58,18 @@ class InvitationController extends StateNotifier<InvitationProgress> {
           .eq('gift_id', giftId)
           .single();
 
-      if (res != null) {
-        final List<dynamic> rawAnswers = res['answer_sets']['answers'];
-        final List<String> textAnswers = rawAnswers
-            .map((a) => a['response_text'] as String)
-            .toList();
-        
-        state = state.copyWith(
-          status: InvitationStatus.pending,
-          giftId: giftId,
-          label: res['answer_sets']['label'],
-          answers: textAnswers,
-        );
-      }
-    } catch (e) {
+      final List<dynamic> rawAnswers = res['answer_sets']['answers'];
+      final List<String> textAnswers = rawAnswers
+          .map((a) => a['response_text'] as String)
+          .toList();
+      
+      state = state.copyWith(
+        status: InvitationStatus.pending,
+        giftId: giftId,
+        label: res['answer_sets']['label'],
+        answers: textAnswers,
+      );
+        } catch (e) {
       // Silent fail for demo stability
       print('Gift fetch failed: $e');
     }

@@ -97,9 +97,7 @@ class AnswerRepository {
 
   /// Get the current set label (classic or custom)
   Future<String> getLabel() async {
-    if (_customLabel == null) {
-      _customLabel = await _storage.read(key: '${_customKey}_label');
-    }
+    _customLabel ??= await _storage.read(key: '${_customKey}_label');
     return _customLabel ?? 'M8 Classic';
   }
 }
