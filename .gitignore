@@ -7,4 +7,4 @@ dist
 apps/m8_app/build
 .gemini/
 .agent/
-.graphify-out/
+graphify-out/
